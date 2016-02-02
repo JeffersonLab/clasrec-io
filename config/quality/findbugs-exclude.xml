@@ -1,0 +1,14 @@
+<FindBugsFilter>
+  <Match>
+    <!-- Exclude Internationalization -->
+    <Bug category="I18N" />
+  </Match>
+  <Match>
+    <!-- Exclude Filter Malicious code vulnerability -->
+    <Bug code="DP,EI,EI2,FI,MS" />
+  </Match>
+  <Match>
+    <!-- Include 1 to 15 -->
+    <Rank value="16" />
+  </Match>
+</FindBugsFilter>
