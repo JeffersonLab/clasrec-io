@@ -22,8 +22,6 @@ import org.jlab.coda.jevio.EvioException;
 /**
  * Converter service that converts EvIO persistent data to EvIO transient data
  * (i.e. Reads EvIO events from an input file)
- *
- * @author smancill
  */
 public class EvioToEvioReader implements Engine {
 
@@ -327,7 +325,7 @@ public class EvioToEvioReader implements Engine {
 
     @Override
     public String getAuthor() {
-        return "Sebastian Mancilla <smancill@jlab.org>";
+        return String.format("%s  <%s>", info.author(), info.email());
     }
 
     @Override

@@ -264,7 +264,7 @@ public class EvioToEvioWriter implements Engine {
 
     @Override
     public String getAuthor() {
-        return String.format("%s <%s>", info.author(), info.email());
+        return String.format("%s  <%s>", info.author(), info.email());
     }
 
     @Override
