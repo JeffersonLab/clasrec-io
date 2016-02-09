@@ -24,4 +24,9 @@ public final class ServiceUtils {
         out.setDescription(msg);
         out.setStatus(EngineStatus.ERROR, severityId);
     }
+
+
+    public static void setError(EngineData out, String format, Object... args) {
+        ServiceUtils.setError(out, String.format(format, args));
+    }
 }
