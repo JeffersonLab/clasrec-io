@@ -269,7 +269,11 @@ public class EvioToEvioWriter implements Engine {
 
     @Override
     public void reset() {
-        // nothing
+        synchronized (writerLock) {
+            if (writer != null) {
+                writeAndClose();
+            }
+        }
     }
 
     @Override

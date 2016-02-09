@@ -332,6 +332,11 @@ public class EvioToEvioReader implements Engine {
 
     @Override
     public void reset() {
+        synchronized (readerLock) {
+            if (evioReader != null) {
+                closeFile();
+            }
+        }
     }
 
 
