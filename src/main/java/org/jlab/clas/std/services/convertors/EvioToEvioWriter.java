@@ -274,8 +274,10 @@ public class EvioToEvioWriter implements Engine {
 
     @Override
     public void destroy() {
-        if (writer != null) {
-            writeAndClose();
+        synchronized (writerLock) {
+            if (writer != null) {
+                writeAndClose();
+            }
         }
     }
 }
