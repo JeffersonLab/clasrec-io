@@ -107,7 +107,7 @@ task deploy(type: Copy, dependsOn: jar) {
 
 
 checkstyle {
-    toolVersion = "6.4"
+    toolVersion = "6.14"
     configFile = new File(rootDir, "config/quality/checkstyle.xml")
     configProperties['samedir'] = new File(project.projectDir, "config/quality")
 }
