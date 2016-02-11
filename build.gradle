@@ -9,7 +9,7 @@ apply plugin: 'idea'
 
 
 archivesBaseName = 'clasrec-io'
-version = '0.1-SNAPSHOT'
+version = '0.8-SNAPSHOT'
 group = 'org.jlab.clas'
 
 defaultTasks 'build'
