@@ -306,7 +306,7 @@ public class DataManager implements Engine {
 
     @Override
     public Set<EngineDataType> getOutputDataTypes() {
-        return null;
+        return ClaraUtil.buildDataTypes(Clas12Types.PROPERTY_LIST, EngineDataType.STRING);
     }
 
     @Override
