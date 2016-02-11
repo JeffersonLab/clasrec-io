@@ -108,8 +108,8 @@ public class DataManager implements Engine {
                 }
             }
 
-            System.out.printf("%s service: Input path set to %s%n", NAME, inputPath);
-            System.out.printf("%s service: Output path set to %s%n", NAME, outputPath);
+            System.out.printf("%s service: input path set to %s%n", NAME, inputPath);
+            System.out.printf("%s service: output path set to %s%n", NAME, outputPath);
             if (pl.containsProperty(PROP_STAGE_PATH)) {
                 System.out.printf("%s service: Stage path set to %s%n", NAME, stagePath);
             }
@@ -211,7 +211,8 @@ public class DataManager implements Engine {
             executor.setStreamHandler(streamHandler);
 
             executor.execute(cmdLine);
-            System.out.printf("Input file '%s' copied to '%s'%n", files.inputFile, stagePath);
+            System.out.printf("%s service: input file '%s' copied to '%s'%n",
+                              NAME, files.inputFile, stagePath);
 
             JPropertyList fileNames = new JPropertyList();
             fileNames.addTailProperty(PROP_INPUT_FILE, files.stagedInputFile.toString());
@@ -238,11 +239,11 @@ public class DataManager implements Engine {
             executor.setStreamHandler(streamHandler);
 
             executor.execute(cmdLine);
-            System.out.printf("Staged input file %s removed%n", files.stagedInputFile);
+            System.out.printf("%s service: staged input file %s removed%n",
+                              NAME, files.stagedInputFile);
             output.setData(EngineDataType.STRING.mimeType(), files.inputFile);
 
         } catch (ExecuteException e) {
-            System.out.println(outputStream.toString().trim());
             String msg = "Could not remove staged input file%n%n%s";
             ServiceUtils.setError(output, msg, outputStream.toString().trim());
         } catch (Exception e) {
@@ -263,12 +264,11 @@ public class DataManager implements Engine {
             executor.setStreamHandler(streamHandler);
 
             executor.execute(cmdLine);
-            System.out.printf("Output file '%s' saved to '%s'%n",
-                              files.stagedOutputFile, outputPath);
+            System.out.printf("%s service: output file '%s' saved to '%s'%n",
+                              NAME, files.stagedOutputFile, outputPath);
             output.setData(EngineDataType.STRING.mimeType(), files.outputFile);
 
         } catch (ExecuteException e) {
-            System.out.println(outputStream.toString().trim());
             String msg = "Could not save output file%n%n%s";
             ServiceUtils.setError(output, msg, outputStream.toString().trim());
         } catch (Exception e) {
