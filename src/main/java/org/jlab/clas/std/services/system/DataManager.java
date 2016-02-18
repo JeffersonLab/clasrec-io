@@ -241,7 +241,7 @@ public class DataManager implements Engine {
             executor.execute(cmdLine);
             System.out.printf("%s service: staged input file %s removed%n",
                               NAME, files.stagedInputFile);
-            output.setData(EngineDataType.STRING.mimeType(), files.inputFile);
+            output.setData(EngineDataType.STRING.mimeType(), files.inputFile.toString());
 
         } catch (ExecuteException e) {
             String msg = "Could not remove staged input file%n%n%s";
@@ -266,7 +266,7 @@ public class DataManager implements Engine {
             executor.execute(cmdLine);
             System.out.printf("%s service: output file '%s' saved to '%s'%n",
                               NAME, files.stagedOutputFile, outputPath);
-            output.setData(EngineDataType.STRING.mimeType(), files.outputFile);
+            output.setData(EngineDataType.STRING.mimeType(), files.outputFile.toString());
 
         } catch (ExecuteException e) {
             String msg = "Could not save output file%n%n%s";
