@@ -8,11 +8,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jlab.clara.base.ClaraUtil;
+import org.jlab.clara.base.core.ClaraConstants;
 import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineSpecification;
-import org.jlab.clara.util.CConstants;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.clas.std.services.util.ServiceUtils;
 import org.jlab.clas12.tools.property.JPropertyList;
@@ -48,7 +48,7 @@ public class EvioToEvioReader implements Engine {
     private final String name = info.name();
 
 
-    private String fileName = CConstants.UNDEFINED;
+    private String fileName = ClaraConstants.UNDEFINED;
     private String openError = NO_FILE;
 
     private EvioCompactReader evioReader;
