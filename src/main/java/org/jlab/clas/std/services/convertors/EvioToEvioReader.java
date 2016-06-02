@@ -15,9 +15,9 @@ import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineSpecification;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.clas.std.services.util.ServiceUtils;
-import org.jlab.clas12.tools.property.JPropertyList;
 import org.jlab.coda.jevio.EvioCompactReader;
 import org.jlab.coda.jevio.EvioException;
+import org.json.JSONObject;
 
 /**
  * Converter service that converts EvIO persistent data to EvIO transient data
@@ -67,11 +67,12 @@ public class EvioToEvioReader implements Engine {
     @Override
     public EngineData configure(EngineData input) {
         final long startTime = System.currentTimeMillis();
-        if (input.getMimeType().equalsIgnoreCase(Clas12Types.PROPERTY_LIST.mimeType())) {
-            JPropertyList pl = (JPropertyList) input.getData();
-            if (pl.containsProperty(CONF_ACTION) && pl.containsProperty(CONF_FILENAME)) {
-                String action = pl.getPropertyValue(CONF_ACTION);
-                String inputFile = pl.getPropertyValue(CONF_FILENAME);
+        if (input.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
+            String source = (String) input.getData();
+            JSONObject data = new JSONObject(source);
+            if (data.has(CONF_ACTION) && data.has(CONF_FILENAME)) {
+                String action = data.getString(CONF_ACTION);
+                String inputFile = data.getString(CONF_FILENAME);
                 if (action.equals(CONF_ACTION_OPEN)) {
                     openFile(inputFile);
                 } else if (action.equals(CONF_ACTION_CLOSE)) {
@@ -79,12 +80,12 @@ public class EvioToEvioReader implements Engine {
                 } else if (action.equals(CONF_ACTION_CACHE)) {
                     readCachedEvent(inputFile);
                 } else {
-                    String errMsg = "%s config: Wrong value of '%s' property = '%s'%n";
+                    String errMsg = "%s config: Wrong value of '%s' parameter = '%s'%n";
                     System.err.printf(errMsg, name, CONF_ACTION, action);
                 }
             } else {
-                String errMsg = "%s config: Missing '%s' or '%s' properties. PL: %s%n";
-                System.err.printf(errMsg, name, CONF_ACTION, CONF_FILENAME, pl);
+                String errMsg = "%s config: Missing '%s' or '%s' parameters: %s%n";
+                System.err.printf(errMsg, name, CONF_ACTION, CONF_FILENAME, source);
             }
         } else {
             String errMsg = "%s config: Wrong config type '%s'%n";
@@ -296,7 +297,7 @@ public class EvioToEvioReader implements Engine {
     @Override
     public Set<EngineDataType> getInputDataTypes() {
         return ClaraUtil.buildDataTypes(
-                Clas12Types.PROPERTY_LIST,
+                EngineDataType.JSON,
                 EngineDataType.STRING);
     }
 

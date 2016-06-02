@@ -14,9 +14,9 @@ import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineSpecification;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.clas.std.services.util.ServiceUtils;
-import org.jlab.clas12.tools.property.JPropertyList;
 import org.jlab.coda.jevio.EvioCompactEventWriter;
 import org.jlab.coda.jevio.EvioException;
+import org.json.JSONObject;
 
 /**
  * Converter service that converts EvIO transient data to EvIO persistent data
@@ -59,33 +59,34 @@ public class EvioToEvioWriter implements Engine {
     @Override
     public EngineData configure(EngineData input) {
 
-        if (input.getMimeType().equalsIgnoreCase(Clas12Types.PROPERTY_LIST.mimeType())) {
-            JPropertyList pl = (JPropertyList) input.getData();
-            if (pl.containsProperty(CONF_ACTION)) {
-                String action = pl.getPropertyValue(CONF_ACTION);
+        if (input.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
+            String source = (String) input.getData();
+            JSONObject configData = new JSONObject(source);
+            if (configData.has(CONF_ACTION)) {
+                String action = configData.getString(CONF_ACTION);
                 if (action.equals(CONF_ACTION_OPEN)) {
-                    if (pl.containsProperty(CONF_FILENAME)) {
-                        openFile(pl);
+                    if (configData.has(CONF_FILENAME)) {
+                        openFile(configData);
                     } else {
-                        String errMsg = "%s config: Missing '%s' property. PL: %s%n";
-                        System.err.printf(errMsg, name, CONF_FILENAME, pl);
+                        String errMsg = "%s config: Missing '%s' parameter: %s%n";
+                        System.err.printf(errMsg, name, CONF_FILENAME, source);
                     }
                 } else if (action.equals(CONF_ACTION_CLOSE)) {
-                    if (pl.containsProperty(CONF_FILENAME)) {
-                        closeFile(pl);
+                    if (configData.has(CONF_FILENAME)) {
+                        closeFile(configData);
                     } else {
-                        String errMsg = "%s config: Missing '%s' property. PL: %s%n";
-                        System.err.printf(errMsg, name, CONF_FILENAME, pl);
+                        String errMsg = "%s config: Missing '%s' parameter: %s%n";
+                        System.err.printf(errMsg, name, CONF_FILENAME, source);
                     }
                 } else if (action.equals(CONF_ACTION_SKIP)) {
                     skipAll();
                 } else {
-                    String errMsg = "%s config: Wrong value of '%s' property = '%s'%n";
+                    String errMsg = "%s config: Wrong value of '%s' parameter = '%s'%n";
                     System.err.printf(errMsg, name, CONF_ACTION, action);
                 }
             } else {
-                String errMsg = "%s config: Missing '%s' property. PL: %s%n";
-                System.err.printf(errMsg, name, CONF_ACTION, pl);
+                String errMsg = "%s config: Missing '%s' parameter: %s%n";
+                System.err.printf(errMsg, name, CONF_ACTION, source);
             }
         } else {
             String errMsg = "%s config: Wrong mimetype '%s'%n";
@@ -96,15 +97,15 @@ public class EvioToEvioWriter implements Engine {
     }
 
 
-    private void openFile(JPropertyList pl) {
+    private void openFile(JSONObject configData) {
         synchronized (writerLock) {
             if (writer != null) {
                 writeAndClose();
             }
 
-            fileName = pl.getPropertyValue(CONF_FILENAME);
-            if (pl.containsProperty(CONF_ORDER)) {
-                String byteOrder = pl.getPropertyValue(CONF_ORDER);
+            fileName = configData.getString(CONF_FILENAME);
+            if (configData.has(CONF_ORDER)) {
+                String byteOrder = configData.getString(CONF_ORDER);
                 if (byteOrder.equals(ByteOrder.BIG_ENDIAN.toString())) {
                     fileByteOrder = ByteOrder.BIG_ENDIAN;
                 } else {
@@ -113,9 +114,8 @@ public class EvioToEvioWriter implements Engine {
             }
 
             boolean overWriteOK = false;
-            if (pl.containsProperty(CONF_OVERWRITE) &&
-                    pl.getPropertyValue(CONF_OVERWRITE).equals("true")) {
-                overWriteOK = true;
+            if (configData.has(CONF_OVERWRITE)) {
+                overWriteOK = configData.getBoolean(CONF_OVERWRITE);
             }
 
             System.out.printf("%s service: Request to open file %s%n", name, fileName);
@@ -156,9 +156,9 @@ public class EvioToEvioWriter implements Engine {
     }
 
 
-    private void closeFile(JPropertyList pl) {
+    private void closeFile(JSONObject data) {
         synchronized (writerLock) {
-            fileName = pl.getPropertyValue(CONF_FILENAME);
+            fileName = data.getString(CONF_FILENAME);
             System.out.printf("%s service: Request to close file %s%n", name, fileName);
             if (writer != null) {
                 writeAndClose();
@@ -239,7 +239,7 @@ public class EvioToEvioWriter implements Engine {
 
     @Override
     public Set<EngineDataType> getInputDataTypes() {
-        return ClaraUtil.buildDataTypes(Clas12Types.EVIO, Clas12Types.PROPERTY_LIST);
+        return ClaraUtil.buildDataTypes(Clas12Types.EVIO, EngineDataType.JSON);
     }
 
     @Override
