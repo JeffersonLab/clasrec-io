@@ -14,27 +14,33 @@ import org.jlab.clara.base.ClaraUtil;
 import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
-import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.clas.std.services.util.ServiceUtils;
-import org.jlab.clas12.tools.property.JPropertyList;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class DataManager implements Engine {
 
     private static final String NAME = "DataManager";
 
-    private static final String PROP_INPUT_PATH = "input_path";
-    private static final String PROP_OUTPUT_PATH = "output_path";
-    private static final String PROP_STAGE_PATH = "stage_path";
+    private static final String CONF_INPUT_PATH = "input_path";
+    private static final String CONF_OUTPUT_PATH = "output_path";
+    private static final String CONF_STAGE_PATH = "stage_path";
 
-    private static final String PROP_ACTION = "action";
-    private static final String PROP_FILENAME = "file";
+    private static final String REQUEST_TYPE = "type";
+    private static final String REQUEST_EXEC = "exec";
+    private static final String REQUEST_QUERY = "query";
 
-    private static final String PROP_ACTION_STAGE = "stage_input";
-    private static final String PROP_ACTION_REMOVE = "remove_input";
-    private static final String PROP_ACTION_SAVE = "save_output";
+    private static final String REQUEST_ACTION = "action";
+    private static final String REQUEST_FILENAME = "file";
 
-    private static final String PROP_INPUT_FILE = "input_file";
-    private static final String PROP_OUTPUT_FILE = "output_file";
+    private static final String REQUEST_EXEC_STAGE = "stage_input";
+    private static final String REQUEST_EXEC_REMOVE = "remove_input";
+    private static final String REQUEST_EXEC_SAVE = "save_output";
+
+    private static final String REQUEST_QUERY_CONFIG = "get_config";
+
+    private static final String REQUEST_INPUT_FILE = "input_file";
+    private static final String REQUEST_OUTPUT_FILE = "output_file";
 
     private final String baseDir;
 
@@ -53,33 +59,32 @@ public class DataManager implements Engine {
     }
 
     /**
-     * Configuration data from an orchestrator should contain the following properties:
+     * Configuration data from an orchestrator should contain the following parameters:
      * <ol>
      * <li> {@code input_path}: path to the location of the input-data files.</li>
      * <li> {@code output_path}: destination path of the output-data file.</li>
      * <li> {@code staging_path} (optional): data-file staging location,
      *      that is also used by the orchestrator to configure RW services.</li>
      * </ol>
-     * @param input property-list containing the configuration properties
+     * @param input JSON text containing the configuration parameters
      */
     @Override
     public EngineData configure(EngineData input) {
         EngineData output = new EngineData();
         String mt = input.getMimeType();
-        if (mt.equalsIgnoreCase(Clas12Types.PROPERTY_LIST.mimeType())) {
-            JPropertyList pl = (JPropertyList) input.getData();
-            if (pl.containsProperty(PROP_INPUT_PATH) && pl.containsProperty(PROP_OUTPUT_PATH)) {
-                try {
-                    updateConfiguration(pl);
-                } catch (IllegalArgumentException e) {
-                    String msg = String.format("%s config: invalid path: %s%n",
-                                               NAME, ClaraUtil.reportException(e));
-                    System.err.print(msg);
-                    ServiceUtils.setError(output, msg);
-                }
-            } else {
-                String msg = String.format("%s config: Missing properties: %s%n",
-                                           NAME, pl.getStringRepresentation(true));
+        if (mt.equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
+            String source = (String) input.getData();
+            try {
+                JSONObject data = new JSONObject(source);
+                updateConfiguration(data);
+                returnData(output, getConfiguration());
+            } catch (IllegalArgumentException e) {
+                String msg = String.format("%s config: invalid path: %s%n",
+                                           NAME, ClaraUtil.reportException(e));
+                System.err.print(msg);
+                ServiceUtils.setError(output, msg);
+            } catch (JSONException e) {
+                String msg = String.format("%s config: invalid data: %s%n", NAME, source);
                 System.err.print(msg);
                 ServiceUtils.setError(output, msg);
             }
@@ -91,18 +96,18 @@ public class DataManager implements Engine {
         return output;
     }
 
-    private void updateConfiguration(JPropertyList pl) {
+    private void updateConfiguration(JSONObject data) {
         try {
-            inputPath = Paths.get(pl.getPropertyValue(PROP_INPUT_PATH));
-            outputPath = Paths.get(pl.getPropertyValue(PROP_OUTPUT_PATH));
+            inputPath = Paths.get(data.getString(CONF_INPUT_PATH));
+            outputPath = Paths.get(data.getString(CONF_OUTPUT_PATH));
             if (inputPath.toString().isEmpty()) {
                 throw new IllegalArgumentException("Empty input path");
             }
             if (outputPath.toString().isEmpty()) {
                 throw new IllegalArgumentException("Empty input path");
             }
-            if (pl.containsProperty(PROP_STAGE_PATH)) {
-                stagePath = Paths.get(pl.getPropertyValue(PROP_STAGE_PATH));
+            if (data.has(CONF_STAGE_PATH)) {
+                stagePath = Paths.get(data.getString(CONF_STAGE_PATH));
                 if (stagePath.toString().isEmpty()) {
                     throw new IllegalArgumentException("Empyt stage path");
                 }
@@ -110,7 +115,7 @@ public class DataManager implements Engine {
 
             System.out.printf("%s service: input path set to %s%n", NAME, inputPath);
             System.out.printf("%s service: output path set to %s%n", NAME, outputPath);
-            if (pl.containsProperty(PROP_STAGE_PATH)) {
+            if (data.has(CONF_STAGE_PATH)) {
                 System.out.printf("%s service: Stage path set to %s%n", NAME, stagePath);
             }
         } catch (Exception e) {
@@ -119,16 +124,16 @@ public class DataManager implements Engine {
         }
     }
 
-    public JPropertyList getConfiguration() {
-        JPropertyList config = new JPropertyList();
-        config.addTailProperty(PROP_INPUT_PATH, inputPath.toString());
-        config.addTailProperty(PROP_OUTPUT_PATH, outputPath.toString());
-        config.addTailProperty(PROP_STAGE_PATH, stagePath.toString());
+    public JSONObject getConfiguration() {
+        JSONObject config = new JSONObject();
+        config.put(CONF_INPUT_PATH, inputPath.toString());
+        config.put(CONF_OUTPUT_PATH, outputPath.toString());
+        config.put(CONF_STAGE_PATH, stagePath.toString());
         return config;
     }
 
     /**
-     * Accepts a property list with an action and an input file name.
+     * Accepts a JSON text with an action and an input file name.
      *
      * Current version assumes that there is a CLAS12 convention
      * that reconstructed/output file name is constructed as:
@@ -147,29 +152,33 @@ public class DataManager implements Engine {
      * saved to the final location and removed from the staging directory.
      * </ul>
      *
-     * The data can also be the string {@code get_config}, in which case a property list
+     * The data can also be the string {@code get_config}, in which case a JSON text
      * with the configured paths will be returned.
      *
-     * @param input property-list or string
+     * @param input JSON text
      * @return paths, file names or error
      */
     @Override
     public EngineData execute(EngineData input) {
         EngineData output = new EngineData();
         String mt = input.getMimeType();
-        if (mt.equalsIgnoreCase(Clas12Types.PROPERTY_LIST.mimeType())) {
-            JPropertyList request = (JPropertyList) input.getData();
-            if (request.containsProperty(PROP_ACTION) && request.containsProperty(PROP_FILENAME)) {
-                runAction(request, output);
-            } else {
-                ServiceUtils.setError(output, "Missing properties: " + request);
-            }
-        } else if (mt.equalsIgnoreCase(EngineDataType.STRING.mimeType())) {
-            String action = (String) input.getData();
-            if (action.equals("get_config")) {
-                output.setData(Clas12Types.PROPERTY_LIST.mimeType(), getConfiguration());
-            } else {
-                ServiceUtils.setError(output, "Wrong request: " + action);
+        if (mt.equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
+            String source = (String) input.getData();
+            try {
+                JSONObject request = new JSONObject(source);
+                String type = request.getString(REQUEST_TYPE);
+                switch (type) {
+                    case REQUEST_EXEC:
+                        runAction(request, output);
+                        break;
+                    case REQUEST_QUERY:
+                        runQuery(request, output);
+                        break;
+                    default:
+                        ServiceUtils.setError(output, "Invalid %s value: %s", REQUEST_TYPE, type);
+                }
+            } catch (JSONException e) {
+                ServiceUtils.setError(output, "Invalid request: " + source);
             }
         } else {
             ServiceUtils.setError(output, "Wrong mimetype: " + mt);
@@ -177,25 +186,40 @@ public class DataManager implements Engine {
         return output;
     }
 
-    private void runAction(JPropertyList request, EngineData output) {
-        String action = request.getPropertyValue(PROP_ACTION);
-        String inputFileName = request.getPropertyValue(PROP_FILENAME);
-        FilePaths files = new FilePaths(inputFileName);
+    private void runAction(JSONObject request, EngineData output) {
+        String action = request.getString(REQUEST_ACTION);
+        String inputFileName = request.getString(REQUEST_FILENAME);
 
+        FilePaths files = new FilePaths(inputFileName);
         Path resolvedFileName = files.inputFile.getFileName();
         if (resolvedFileName == null || !inputFileName.equals(resolvedFileName.toString())) {
             ServiceUtils.setError(output, "Invalid input file name: " + inputFileName);
             return;
         }
 
-        if (action.equals(PROP_ACTION_STAGE)) {
-            stageInputFile(files, output);
-        } else if (action.equals(PROP_ACTION_REMOVE)) {
-            removeStagedInputFile(files, output);
-        } else if (action.equals(PROP_ACTION_SAVE)) {
-            saveOutputFile(files, output);
-        } else {
-            ServiceUtils.setError(output, "Wrong " + PROP_ACTION + " value: " + action);
+        switch (action) {
+            case REQUEST_EXEC_STAGE:
+                stageInputFile(files, output);
+                break;
+            case REQUEST_EXEC_REMOVE:
+                removeStagedInputFile(files, output);
+                break;
+            case REQUEST_EXEC_SAVE:
+                saveOutputFile(files, output);
+                break;
+            default:
+                ServiceUtils.setError(output, "Invalid %s value: %s", REQUEST_ACTION, action);
+        }
+    }
+
+    private void runQuery(JSONObject request, EngineData output) {
+        String action = request.getString(REQUEST_ACTION);
+        switch (action) {
+            case REQUEST_QUERY_CONFIG:
+                returnData(output, getConfiguration());
+                break;
+            default:
+                ServiceUtils.setError(output, "Invalid %s value: %s", REQUEST_ACTION, action);
         }
     }
 
@@ -213,11 +237,7 @@ public class DataManager implements Engine {
             executor.execute(cmdLine);
             System.out.printf("%s service: input file '%s' copied to '%s'%n",
                               NAME, files.inputFile, stagePath);
-
-            JPropertyList fileNames = new JPropertyList();
-            fileNames.addTailProperty(PROP_INPUT_FILE, files.stagedInputFile.toString());
-            fileNames.addTailProperty(PROP_OUTPUT_FILE, files.stagedOutputFile.toString());
-            output.setData(Clas12Types.PROPERTY_LIST.mimeType(), fileNames);
+            returnFilePaths(output, files);
 
         } catch (ExecuteException e) {
             String msg = "Could not stage input file%n%n%s";
@@ -241,7 +261,7 @@ public class DataManager implements Engine {
             executor.execute(cmdLine);
             System.out.printf("%s service: staged input file %s removed%n",
                               NAME, files.stagedInputFile);
-            output.setData(EngineDataType.STRING.mimeType(), files.inputFile.toString());
+            returnFilePaths(output, files);
 
         } catch (ExecuteException e) {
             String msg = "Could not remove staged input file%n%n%s";
@@ -266,7 +286,7 @@ public class DataManager implements Engine {
             executor.execute(cmdLine);
             System.out.printf("%s service: output file '%s' saved to '%s'%n",
                               NAME, files.stagedOutputFile, outputPath);
-            output.setData(EngineDataType.STRING.mimeType(), files.outputFile.toString());
+            returnFilePaths(output, files);
 
         } catch (ExecuteException e) {
             String msg = "Could not save output file%n%n%s";
@@ -276,6 +296,18 @@ public class DataManager implements Engine {
             ServiceUtils.setError(output, msg, ClaraUtil.reportException(e));
         }
     }
+
+    private void returnFilePaths(EngineData output, FilePaths files) {
+        JSONObject fileNames = new JSONObject();
+        fileNames.put(REQUEST_INPUT_FILE, files.stagedInputFile.toString());
+        fileNames.put(REQUEST_OUTPUT_FILE, files.stagedOutputFile.toString());
+        returnData(output, fileNames);
+    }
+
+    private void returnData(EngineData output, JSONObject data) {
+        output.setData(EngineDataType.JSON.mimeType(), data.toString());
+    }
+
 
     private class FilePaths {
 
@@ -301,12 +333,12 @@ public class DataManager implements Engine {
 
     @Override
     public Set<EngineDataType> getInputDataTypes() {
-        return ClaraUtil.buildDataTypes(Clas12Types.PROPERTY_LIST, EngineDataType.STRING);
+        return ClaraUtil.buildDataTypes(EngineDataType.JSON);
     }
 
     @Override
     public Set<EngineDataType> getOutputDataTypes() {
-        return ClaraUtil.buildDataTypes(Clas12Types.PROPERTY_LIST, EngineDataType.STRING);
+        return ClaraUtil.buildDataTypes(EngineDataType.JSON);
     }
 
     @Override
