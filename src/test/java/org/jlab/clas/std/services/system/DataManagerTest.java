@@ -10,9 +10,9 @@ import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 import org.jlab.clara.engine.EngineData;
+import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineStatus;
-import org.jlab.clas.std.services.util.Clas12Types;
-import org.jlab.clas12.tools.property.JPropertyList;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,10 +39,10 @@ public class DataManagerTest {
 
     @Test
     public void setAllPaths() throws Exception {
-        EngineData config = createPropertiesRequest(pl -> {
-            pl.addTailProperty("input_path", "/mnt/exp/in");
-            pl.addTailProperty("output_path", "/mnt/exp/out");
-            pl.addTailProperty("stage_path", "/tmp/files");
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "/mnt/exp/in");
+            data.put("output_path", "/mnt/exp/out");
+            data.put("stage_path", "/tmp/files");
         });
 
         dm.configure(config);
@@ -53,9 +53,9 @@ public class DataManagerTest {
 
     @Test
     public void configInputOutputPaths() throws Exception {
-        EngineData config = createPropertiesRequest(pl -> {
-            pl.addTailProperty("input_path", "/mnt/exp/in");
-            pl.addTailProperty("output_path", "/mnt/exp/out");
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "/mnt/exp/in");
+            data.put("output_path", "/mnt/exp/out");
         });
 
         dm.configure(config);
@@ -65,19 +65,19 @@ public class DataManagerTest {
 
 
     private void assertPaths(String input, String output, String stage) {
-        JPropertyList result = dm.getConfiguration();
+        JSONObject result = dm.getConfiguration();
 
-        assertThat(result.getProperty("input_path").getValue(), is(input));
-        assertThat(result.getProperty("output_path").getValue(), is(output));
-        assertThat(result.getProperty("stage_path").getValue(), is(stage));
+        assertThat(result.getString("input_path"), is(input));
+        assertThat(result.getString("output_path"), is(output));
+        assertThat(result.getString("stage_path"), is(stage));
     }
 
 
     @Test
     public void configReturnsErrorOnInvalidInputPath() throws Exception {
-        EngineData config = createPropertiesRequest(pl -> {
-            pl.addTailProperty("input_path", "");
-            pl.addTailProperty("output_path", "/mnt/exp/out");
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "");
+            data.put("output_path", "/mnt/exp/out");
         });
 
         assertErrorOnConfig(config, "invalid path");
@@ -86,9 +86,9 @@ public class DataManagerTest {
 
     @Test
     public void configReturnsErrorOnInvalidOutputPath() throws Exception {
-        EngineData config = createPropertiesRequest(pl -> {
-            pl.addTailProperty("input_path", "/mnt/exp/out");
-            pl.addTailProperty("output_path", "");
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "/mnt/exp/out");
+            data.put("output_path", "");
         });
 
         assertErrorOnConfig(config, "invalid path");
@@ -97,10 +97,10 @@ public class DataManagerTest {
 
     @Test
     public void configReturnsErrorOnInvalidStagePath() throws Exception {
-        EngineData config = createPropertiesRequest(pl -> {
-            pl.addTailProperty("input_path", "/mnt/exp/in");
-            pl.addTailProperty("output_path", "/mnt/exp/out");
-            pl.addTailProperty("stage_path", "");
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "/mnt/exp/in");
+            data.put("output_path", "/mnt/exp/out");
+            data.put("stage_path", "");
         });
 
         assertErrorOnConfig(config, "invalid path");
@@ -109,11 +109,11 @@ public class DataManagerTest {
 
     @Test
     public void configReturnsErrorOnMissingPath() throws Exception {
-        EngineData config = createPropertiesRequest(pl -> {
-            pl.addTailProperty("input_path", "/mnt/exp/in");
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "/mnt/exp/in");
         });
 
-        assertErrorOnConfig(config, "Missing properties");
+        assertErrorOnConfig(config, "invalid data");
     }
 
 
@@ -130,9 +130,10 @@ public class DataManagerTest {
     public void executeStagesInputFile() throws Exception {
         TestPaths paths = setTestDirectories();
 
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "stage_input");
-            pl.addTailProperty("file", paths.inputFile.getFileName().toString());
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "stage_input");
+            data.put("file", paths.inputFile.getFileName().toString());
         });
 
         EngineData result = dm.execute(request);
@@ -148,9 +149,10 @@ public class DataManagerTest {
         Files.copy(paths.inputFile, paths.stagedInputFile);
         assertThat("Staged input exists", paths.stagedInputFile.toFile().exists(), is(true));
 
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "remove_input");
-            pl.addTailProperty("file", paths.inputFile.getFileName().toString());
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "remove_input");
+            data.put("file", paths.inputFile.getFileName().toString());
         });
 
         EngineData result = dm.execute(request);
@@ -168,9 +170,10 @@ public class DataManagerTest {
         assertThat("Staged output exists", paths.stagedOutputFile.toFile().exists(), is(true));
         assertThat("Saved output exists", paths.outputFile.toFile().exists(), is(false));
 
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "save_output");
-            pl.addTailProperty("file", paths.inputFile.getFileName().toString());
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "save_output");
+            data.put("file", paths.inputFile.getFileName().toString());
         });
 
         EngineData result = dm.execute(request);
@@ -214,10 +217,10 @@ public class DataManagerTest {
         paths.stagedInputFile.toFile().deleteOnExit();
         paths.stagedOutputFile.toFile().deleteOnExit();
 
-        EngineData config = createPropertiesRequest(pl -> {
-            pl.addTailProperty("input_path", paths.inputDir.toString());
-            pl.addTailProperty("output_path", paths.outputDir.toString());
-            pl.addTailProperty("stage_path", paths.stageDir.toString());
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", paths.inputDir.toString());
+            data.put("output_path", paths.outputDir.toString());
+            data.put("stage_path", paths.stageDir.toString());
         });
 
         dm.configure(config);
@@ -228,9 +231,10 @@ public class DataManagerTest {
 
     @Test
     public void executeStageInputFailureReturnsError() throws Exception {
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "stage_input");
-            pl.addTailProperty("file", "file.ev");
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "stage_input");
+            data.put("file", "file.ev");
         });
 
         assertErrorOnExecute(request, "Could not stage input");
@@ -239,9 +243,10 @@ public class DataManagerTest {
 
     @Test
     public void executeRemoveStagedInputFailureReturnsError() throws Exception {
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "remove_input");
-            pl.addTailProperty("file", "file.ev");
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "remove_input");
+            data.put("file", "file.ev");
         });
 
         assertErrorOnExecute(request, "Could not remove staged input");
@@ -250,9 +255,10 @@ public class DataManagerTest {
 
     @Test
     public void executeSavesOutputFailureReturnsError() throws Exception {
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "save_output");
-            pl.addTailProperty("file", "file.ev");
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "save_output");
+            data.put("file", "file.ev");
         });
 
         assertErrorOnExecute(request, "Could not save output file");
@@ -261,23 +267,24 @@ public class DataManagerTest {
 
     @Test
     public void executeReturnsErrorOnMissingProperty() throws Exception {
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("command", "bad_action");
-            pl.addTailProperty("file", "/mnt/exp/in/file.ev");
+        EngineData request = createJsonRequest(data -> {
+            data.put("command", "bad_action");
+            data.put("file", "/mnt/exp/in/file.ev");
         });
 
-        assertErrorOnExecute(request, "Missing properties");
+        assertErrorOnExecute(request, "Invalid request");
     }
 
 
     @Test
     public void executeReturnsErrorOnWrongAction() throws Exception {
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "bad_action");
-            pl.addTailProperty("file", "file.ev");
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "bad_action");
+            data.put("file", "file.ev");
         });
 
-        assertErrorOnExecute(request, "Wrong action value: bad_action");
+        assertErrorOnExecute(request, "Invalid action value: bad_action");
     }
 
 
@@ -292,20 +299,21 @@ public class DataManagerTest {
 
     @Test
     public void executeReturnsErrorOnInputFileWithFullPath() throws Exception {
-        EngineData request = createPropertiesRequest(pl -> {
-            pl.addTailProperty("action", "stage_input");
-            pl.addTailProperty("file", "/mnt/exp/in/file.ev");
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "stage_input");
+            data.put("file", "/mnt/exp/in/file.ev");
         });
 
         assertErrorOnExecute(request, "Invalid input file name");
     }
 
 
-    private EngineData createPropertiesRequest(Consumer<JPropertyList> builder) {
-        JPropertyList pl = new JPropertyList();
-        builder.accept(pl);
+    private EngineData createJsonRequest(Consumer<JSONObject> builder) {
+        JSONObject data = new JSONObject();
+        builder.accept(data);
         EngineData request = new EngineData();
-        request.setData(Clas12Types.PROPERTY_LIST.mimeType(), pl);
+        request.setData(EngineDataType.JSON.mimeType(), data.toString());
         return request;
     }
 
