@@ -98,22 +98,25 @@ task distSources(type: Tar, dependsOn: build) {
 
 
 def deploySpec = copySpec {
-    into ('plugins/clas12/lib') {
+    into ('lib') {
         from configurations.runtime - configurations.provided
+    }
+    into ('services') {
         from "${jar.archivePath}"
     }
 }
 
 
 task deploy(type: Copy, dependsOn: jar) {
-    def dest = "$System.env.CLARA_HOME"
+    def dest = "$System.env.CLARA_HOME/plugins/clas12"
     into dest
     with deploySpec
 
     doFirst {
-        if (dest == "null") {
+        if ("$System.env.CLARA_HOME" == "null") {
             throw new GradleException('CLARA_HOME not set')
         }
+        file("${dest}").mkdirs()
     }
 }
 
