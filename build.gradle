@@ -98,7 +98,7 @@ task distSources(type: Tar, dependsOn: build) {
 
 
 def deploySpec = copySpec {
-    into ('lib') {
+    into ('services') {
         from configurations.runtime - configurations.provided
         from "${jar.archivePath}"
     }
