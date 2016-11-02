@@ -101,7 +101,7 @@ def deploySpec = copySpec {
     into ('lib') {
         from configurations.runtime - configurations.provided
     }
-    into ('services') {
+    into ('plugins/clas12/lib') {
         from "${jar.archivePath}"
     }
 }
