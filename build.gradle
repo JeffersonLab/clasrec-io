@@ -98,7 +98,7 @@ task distSources(type: Tar, dependsOn: build) {
 
 
 def deploySpec = copySpec {
-    into ('plugins/clas12/lib') {
+    into ('lib') {
         from configurations.runtime - configurations.provided
         from "${jar.archivePath}"
     }
