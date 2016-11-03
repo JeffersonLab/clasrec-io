@@ -15,6 +15,12 @@ version = '0.8-SNAPSHOT'
 defaultTasks 'build'
 
 
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+
 configurations {
     provided
     compile.extendsFrom provided
