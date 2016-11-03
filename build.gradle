@@ -22,8 +22,7 @@ compileJava {
 
 
 configurations {
-    provided
-    compile.extendsFrom provided
+    testCompile.extendsFrom compileOnly
 }
 
 
@@ -37,7 +36,7 @@ repositories {
 
 
 dependencies {
-    provided 'org.jlab.coda:jclara:4.3-SNAPSHOT'
+    compileOnly 'org.jlab.coda:jclara:4.3-SNAPSHOT'
     compile 'org.jlab.coda:jevio:4.4.6'
     compile 'org.json:json:20160212'
     compile 'org.apache.commons:commons-exec:1.3'
@@ -109,7 +108,7 @@ task distSources(type: Tar, dependsOn: build) {
 
 def deploySpec = copySpec {
     into ('lib') {
-        from configurations.runtime - configurations.provided
+        from configurations.runtime
     }
     into ('services') {
         from jar.archivePath
