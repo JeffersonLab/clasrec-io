@@ -134,7 +134,6 @@ task deploy(type: Copy, overwrite: true, dependsOn: jar) {
 checkstyle {
     toolVersion = '6.19'
     configFile = file('config/quality/checkstyle.xml')
-    configProperties['samedir'] = file('config/quality')
 }
 
 findbugs {
