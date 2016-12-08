@@ -119,7 +119,7 @@ def deploySpec = copySpec {
 
 
 task deploy(type: Copy, overwrite: true, dependsOn: jar) {
-    def dest = "$System.env.CLARA_HOME/plugins/clas12"
+    def dest = "$System.env.CLARA_HOME/plugins/clas12/lib/services"
 
     into dest
     with deploySpec
