@@ -112,14 +112,14 @@ def deploySpec = copySpec {
     into ('lib') {
         from configurations.runtime
     }
-    into ('services') {
+    into ('clas') {
         from jar.archivePath
     }
 }
 
 
 task deploy(type: Copy, overwrite: true, dependsOn: jar) {
-    def dest = "$System.env.CLARA_HOME/plugins/clas12/lib/clas"
+    def dest = "$System.env.CLARA_HOME/plugins/clas12/lib"
 
     into dest
     with deploySpec
