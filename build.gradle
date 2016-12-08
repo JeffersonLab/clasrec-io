@@ -109,9 +109,9 @@ task distSources(type: Tar, dependsOn: build) {
 
 
 def deploySpec = copySpec {
-    into ('lib') {
-        from configurations.runtime
-    }
+//    into ('lib') {
+//        from configurations.runtime
+//    }
     into ('clas') {
         from jar.archivePath
     }
