@@ -109,17 +109,17 @@ task distSources(type: Tar, dependsOn: build) {
 
 
 def deploySpec = copySpec {
-//    into ('lib') {
-//        from configurations.runtime
-//    }
-    into ('clas') {
+    into ('lib') {
+        from configurations.runtime
+    }
+    into ('plugins/clas12/lib/clas') {
         from jar.archivePath
     }
 }
 
 
 task deploy(type: Copy, overwrite: true, dependsOn: jar) {
-    def dest = "$System.env.CLARA_HOME/plugins/clas12/lib"
+    def dest = "$System.env.CLARA_HOME"
 
     into dest
     with deploySpec
