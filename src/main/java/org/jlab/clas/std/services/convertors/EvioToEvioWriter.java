@@ -15,7 +15,7 @@ import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineSpecification;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.clas.std.services.util.ServiceUtils;
-import org.jlab.coda.jevio.EvioCompactEventWriter;
+import org.jlab.coda.jevio.EventWriter;
 import org.jlab.coda.jevio.EvioException;
 import org.json.JSONObject;
 
@@ -53,7 +53,7 @@ public class EvioToEvioWriter implements Engine {
     private String openError = NO_FILE;
     private int eventCounter;
 
-    private EvioCompactEventWriter writer;
+    private EventWriter writer;
     private final Object writerLock = new Object();
 
 
@@ -127,26 +127,11 @@ public class EvioToEvioWriter implements Engine {
                 if (outputDir != null) {
                     Files.createDirectories(outputDir.toPath());
                 }
-                if (!overWriteOK) {
-                    writer = new EvioCompactEventWriter(file.getName(),
-                                                        file.getParent(),
-                                                        0,
-                                                        0,
-                                                        20000000,
-                                                        fileByteOrder,
-                                                        null);
-                } else {
-                    writer = new EvioCompactEventWriter(file.getName(),
-                                                        file.getParent(),
-                                                        0,
-                                                        0,
-                                                        1000000,
-                                                        10000,
-                                                        20000000,
-                                                        fileByteOrder,
-                                                        null,
-                                                        true);
-                }
+                writer = new EventWriter(file.getName(), file.getParent(),
+                                         null, 0, 0,
+                                         1_000_000, 10_000, 20_000_000,
+                                         fileByteOrder, null, null,
+                                         overWriteOK, false);
                 eventCounter = 0;
                 System.out.printf("%s service: Opened file %s%n", name, fileName);
             } catch (IOException | EvioException e) {
