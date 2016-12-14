@@ -283,6 +283,8 @@ public class DataManager implements Engine {
     private void saveOutputFile(FilePaths files, EngineData output) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
+            Files.createDirectories(outputPath);
+
             CommandLine cmdLine = new CommandLine("mv");
             cmdLine.addArgument(files.stagedOutputFile.toString());
             cmdLine.addArgument(files.outputFile.toString());

@@ -183,6 +183,28 @@ public class DataManagerTest {
 
 
     @Test
+    public void executeCreatesDirectoryBeforeSavingOutputFile() throws Exception {
+        TestPaths paths = setTestDirectories();
+        Files.copy(paths.inputFile, paths.stagedOutputFile);
+        Files.delete(paths.outputDir);
+
+        assertThat("Staged output exists", paths.stagedOutputFile.toFile().exists(), is(true));
+        assertThat("Output directory exists", paths.outputDir.toFile().exists(), is(false));
+
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "save_output");
+            data.put("file", paths.inputFile.getFileName().toString());
+        });
+
+        EngineData result = dm.execute(request);
+
+        assertThat("Result is not an error", result.getStatus(), is(not(EngineStatus.ERROR)));
+        assertThat("Output directory exists", paths.outputDir.toFile().exists(), is(true));
+    }
+
+
+    @Test
     public void executeSavesOutputFile() throws Exception {
         TestPaths paths = setTestDirectories();
         Files.copy(paths.inputFile, paths.stagedOutputFile);
