@@ -1,6 +1,7 @@
 package org.jlab.clas.std.services.system;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +15,7 @@ import org.jlab.clara.base.ClaraUtil;
 import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
+import org.jlab.clas.std.services.util.FileUtils;
 import org.jlab.clas.std.services.util.ServiceUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +38,7 @@ public class DataManager implements Engine {
     private static final String REQUEST_EXEC_STAGE = "stage_input";
     private static final String REQUEST_EXEC_REMOVE = "remove_input";
     private static final String REQUEST_EXEC_SAVE = "save_output";
+    private static final String REQUEST_EXEC_CLEAR = "clear_stage";
 
     private static final String REQUEST_QUERY_CONFIG = "get_config";
 
@@ -207,6 +210,9 @@ public class DataManager implements Engine {
             case REQUEST_EXEC_SAVE:
                 saveOutputFile(files, output);
                 break;
+            case REQUEST_EXEC_CLEAR:
+                clearStageDir(files, output);
+                break;
             default:
                 ServiceUtils.setError(output, "Invalid %s value: %s", REQUEST_ACTION, action);
         }
@@ -295,6 +301,21 @@ public class DataManager implements Engine {
             ServiceUtils.setError(output, msg, outputStream.toString().trim());
         } catch (Exception e) {
             String msg = "Could not save output file%n%n%s";
+            ServiceUtils.setError(output, msg, ClaraUtil.reportException(e));
+        }
+    }
+
+    private void clearStageDir(FilePaths files, EngineData output) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            FileUtils.deleteFileTree(stagePath);
+            System.out.printf("%s service: removed stage directory '%s'%n", NAME, stagePath);
+            returnFilePaths(output, files);
+        } catch (UncheckedIOException e) {
+            String msg = "Could not remove stage directory%n%n%s";
+            ServiceUtils.setError(output, msg, outputStream.toString().trim());
+        } catch (Exception e) {
+            String msg = "Could not remove stage directory%n%n%s";
             ServiceUtils.setError(output, msg, ClaraUtil.reportException(e));
         }
     }
