@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
 import java.util.Set;
 
 import org.jlab.clara.base.ClaraUtil;
@@ -122,6 +123,10 @@ public class EvioToEvioWriter implements Engine {
             System.out.printf("%s service: Request to open file %s%n", name, fileName);
             try {
                 File file = new File(fileName);
+                File outputDir = file.getParentFile();
+                if (outputDir != null) {
+                    Files.createDirectories(outputDir.toPath());
+                }
                 if (!overWriteOK) {
                     writer = new EvioCompactEventWriter(file.getName(),
                                                         file.getParent(),
@@ -144,7 +149,7 @@ public class EvioToEvioWriter implements Engine {
                 }
                 eventCounter = 0;
                 System.out.printf("%s service: Opened file %s%n", name, fileName);
-            } catch (EvioException e) {
+            } catch (IOException | EvioException e) {
                 openError = String.format("Error opening the file %s%n%s",
                                           fileName, ClaraUtil.reportException(e));
                 System.err.printf("%s service: %s%n", name, openError);
