@@ -115,7 +115,7 @@ public class DataManager implements Engine {
             System.out.printf("%s service: input path set to %s%n", NAME, inputPath);
             System.out.printf("%s service: output path set to %s%n", NAME, outputPath);
             if (data.has(CONF_STAGE_PATH)) {
-                System.out.printf("%s service: Stage path set to %s%n", NAME, stagePath);
+                System.out.printf("%s service: stage path set to %s%n", NAME, stagePath);
             }
         } catch (Exception e) {
             reset();
