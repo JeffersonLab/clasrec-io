@@ -1,6 +1,7 @@
 package org.jlab.clas.std.services.system;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -225,6 +226,8 @@ public class DataManager implements Engine {
     private void stageInputFile(FilePaths files, EngineData output) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
+            Files.createDirectories(stagePath);
+
             CommandLine cmdLine = new CommandLine("cp");
             cmdLine.addArgument(files.inputFile.toString());
             cmdLine.addArgument(files.stagedInputFile.toString());

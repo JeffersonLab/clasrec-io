@@ -127,6 +127,26 @@ public class DataManagerTest {
 
 
     @Test
+    public void executeCreatesDirectoryBeforeStagingInputFile() throws Exception {
+        TestPaths paths = setTestDirectories();
+        Files.delete(paths.stageDir);
+
+        assertThat("Stage directory exists", paths.stageDir.toFile().exists(), is(false));
+
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "stage_input");
+            data.put("file", paths.inputFile.getFileName().toString());
+        });
+
+        EngineData result = dm.execute(request);
+
+        assertThat("Result is not an error", result.getStatus(), is(not(EngineStatus.ERROR)));
+        assertThat("Stage directory exists", paths.stageDir.toFile().exists(), is(true));
+    }
+
+
+    @Test
     public void executeStagesInputFile() throws Exception {
         TestPaths paths = setTestDirectories();
 
