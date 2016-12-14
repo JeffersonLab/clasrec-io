@@ -58,7 +58,7 @@ public class EvioToEvioWriter implements Engine {
 
     @Override
     public EngineData configure(EngineData input) {
-
+        final long startTime = System.currentTimeMillis();
         if (input.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
             String source = (String) input.getData();
             JSONObject configData = new JSONObject(source);
@@ -92,7 +92,8 @@ public class EvioToEvioWriter implements Engine {
             String errMsg = "%s config: Wrong mimetype '%s'%n";
             System.err.printf(errMsg, name, input.getMimeType());
         }
-
+        long configureTime = System.currentTimeMillis() - startTime;
+        System.out.printf("%s config time: %d [ms]%n", name, configureTime);
         return null;
     }
 
