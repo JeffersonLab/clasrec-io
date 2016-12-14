@@ -39,6 +39,7 @@ repositories {
 
 dependencies {
     compileOnly 'org.jlab.coda:jclara:4.3-SNAPSHOT'
+    compile 'org.hep.hipo:hipo:2.0-SNAPSHOT'
     compile 'org.jlab.coda:jevio:4.4.6'
     compile 'org.json:json:20160212'
     compile 'org.apache.commons:commons-exec:1.3'
