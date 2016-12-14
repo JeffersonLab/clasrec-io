@@ -1,7 +1,6 @@
 package org.jlab.clas.std.services.system;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -242,7 +241,7 @@ public class DataManager implements Engine {
         } catch (ExecuteException e) {
             String msg = "Could not stage input file%n%n%s";
             ServiceUtils.setError(output, msg, outputStream.toString().trim());
-        } catch (IOException e) {
+        } catch (Exception e) {
             String msg = "Could not stage input file%n%n%s";
             ServiceUtils.setError(output, msg, ClaraUtil.reportException(e));
         }
