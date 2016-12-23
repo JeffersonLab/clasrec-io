@@ -12,6 +12,12 @@ public final class FileUtils {
 
     private FileUtils() { }
 
+    public static void createDirectories(Path dir) throws IOException {
+        if (!Files.exists(dir)) {
+            Files.createDirectories(dir);
+        }
+    }
+
     public static void deleteFileTree(Path dir) throws IOException {
         try {
             Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {

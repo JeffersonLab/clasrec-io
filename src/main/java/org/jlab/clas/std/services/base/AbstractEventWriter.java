@@ -2,7 +2,6 @@ package org.jlab.clas.std.services.base;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -13,6 +12,7 @@ import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineSpecification;
+import org.jlab.clas.std.services.util.FileUtils;
 import org.jlab.clas.std.services.util.ServiceUtils;
 import org.json.JSONObject;
 
@@ -97,7 +97,7 @@ public abstract class AbstractEventWriter<Writer> implements Engine {
                 File file = new File(fileName);
                 File outputDir = file.getParentFile();
                 if (outputDir != null) {
-                    Files.createDirectories(outputDir.toPath());
+                    FileUtils.createDirectories(outputDir.toPath());
                 }
                 writer = createWriter(Paths.get(fileName), configData);
                 eventCounter = 0;
