@@ -1,7 +1,7 @@
 package org.jlab.clas.std.services.system;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UncheckedIOException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -313,7 +313,7 @@ public class DataManager implements Engine {
             FileUtils.deleteFileTree(stagePath);
             System.out.printf("%s service: removed stage directory '%s'%n", NAME, stagePath);
             returnFilePaths(output, files);
-        } catch (UncheckedIOException e) {
+        } catch (IOException e) {
             String msg = "Could not remove stage directory%n%n%s";
             ServiceUtils.setError(output, msg, outputStream.toString().trim());
         } catch (Exception e) {

@@ -1,7 +1,6 @@
 package org.jlab.clas.std.services.util;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -13,7 +12,7 @@ public final class FileUtils {
 
     private FileUtils() { }
 
-    public static void deleteFileTree(Path dir) {
+    public static void deleteFileTree(Path dir) throws IOException {
         try {
             Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
                     @Override
@@ -37,8 +36,6 @@ public final class FileUtils {
             });
         } catch (NoSuchFileException e) {
             // ignore
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 }
