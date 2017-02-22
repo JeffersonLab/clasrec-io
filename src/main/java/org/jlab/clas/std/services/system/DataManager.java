@@ -47,9 +47,7 @@ public class DataManager implements Engine {
 
     private final String baseDir;
 
-    private volatile Path inputPath;
-    private volatile Path outputPath;
-    private volatile Path stagePath;
+    private volatile DirectoryPaths directoryPaths;
     private volatile String outputPrefix;
 
     public DataManager() {
@@ -99,39 +97,17 @@ public class DataManager implements Engine {
     }
 
     private void updateConfiguration(JSONObject data) {
-        try {
-            inputPath = Paths.get(data.getString(CONF_INPUT_PATH));
-            outputPath = Paths.get(data.getString(CONF_OUTPUT_PATH));
-            if (inputPath.toString().isEmpty()) {
-                throw new IllegalArgumentException("empty input path");
-            }
-            if (outputPath.toString().isEmpty()) {
-                throw new IllegalArgumentException("empty output path");
-            }
-            if (data.has(CONF_STAGE_PATH)) {
-                stagePath = Paths.get(data.getString(CONF_STAGE_PATH));
-                if (stagePath.toString().isEmpty()) {
-                    throw new IllegalArgumentException("empty stage path");
-                }
-            }
-
-            System.out.printf("%s service: input path set to %s%n", NAME, inputPath);
-            System.out.printf("%s service: output path set to %s%n", NAME, outputPath);
-            if (data.has(CONF_STAGE_PATH)) {
-                System.out.printf("%s service: stage path set to %s%n", NAME, stagePath);
-            }
-        } catch (Exception e) {
-            reset();
-            throw e;
+        DirectoryPaths paths = new DirectoryPaths(data);
+        System.out.printf("%s service: input path set to %s%n", NAME, paths.inputPath);
+        System.out.printf("%s service: output path set to %s%n", NAME, paths.outputPath);
+        if (data.has(CONF_STAGE_PATH)) {
+            System.out.printf("%s service: stage path set to %s%n", NAME, paths.stagePath);
         }
+        directoryPaths = paths;
     }
 
     public JSONObject getConfiguration() {
-        JSONObject config = new JSONObject();
-        config.put(CONF_INPUT_PATH, inputPath.toString());
-        config.put(CONF_OUTPUT_PATH, outputPath.toString());
-        config.put(CONF_STAGE_PATH, stagePath.toString());
-        return config;
+        return directoryPaths.getConfiguration();
     }
 
     /**
@@ -192,7 +168,7 @@ public class DataManager implements Engine {
         String action = request.getString(REQUEST_ACTION);
         String inputFileName = request.getString(REQUEST_FILENAME);
 
-        FilePaths files = new FilePaths(inputFileName);
+        FilePaths files = new FilePaths(directoryPaths, outputPrefix, inputFileName);
         Path resolvedFileName = files.inputFile.getFileName();
         if (resolvedFileName == null || !inputFileName.equals(resolvedFileName.toString())) {
             ServiceUtils.setError(output, "Invalid input file name: " + inputFileName);
@@ -229,6 +205,7 @@ public class DataManager implements Engine {
     }
 
     private void stageInputFile(FilePaths files, EngineData output) {
+        Path stagePath = files.stagedInputFile.getParent();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             Files.createDirectories(stagePath);
@@ -280,6 +257,7 @@ public class DataManager implements Engine {
     }
 
     private void saveOutputFile(FilePaths files, EngineData output) {
+        Path outputPath = files.outputFile.getParent();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             Files.createDirectories(outputPath);
@@ -307,6 +285,7 @@ public class DataManager implements Engine {
     }
 
     private void clearStageDir(FilePaths files, EngineData output) {
+        Path stagePath = files.stagedInputFile.getParent();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             FileUtils.deleteFileTree(stagePath);
@@ -333,22 +312,62 @@ public class DataManager implements Engine {
     }
 
 
-    private class FilePaths {
+    private static class DirectoryPaths {
+
+        private final Path inputPath;
+        private final Path outputPath;
+        private final Path stagePath;
+
+        DirectoryPaths(String baseDir) {
+            inputPath = Paths.get(baseDir, "data", "in");
+            outputPath = Paths.get(baseDir, "data", "out");
+            stagePath = Paths.get("/scratch");
+        }
+
+        DirectoryPaths(JSONObject data) {
+            inputPath = getPath(data, CONF_INPUT_PATH, "input");
+            outputPath = getPath(data, CONF_OUTPUT_PATH, "output");
+            stagePath = data.has(CONF_STAGE_PATH)
+                    ? getPath(data, CONF_STAGE_PATH, "stage")
+                    : Paths.get("/scratch");
+        }
+
+        JSONObject getConfiguration() {
+            JSONObject config = new JSONObject();
+            config.put(CONF_INPUT_PATH, inputPath.toString());
+            config.put(CONF_OUTPUT_PATH, outputPath.toString());
+            config.put(CONF_STAGE_PATH, stagePath.toString());
+            return config;
+        }
+    }
+
+
+    private static class FilePaths {
 
         private final Path stagedOutputFile;
         private final Path outputFile;
         private final Path stagedInputFile;
         private final Path inputFile;
 
-        FilePaths(String inputFileName) {
-            inputFile = inputPath.resolve(inputFileName);
-            stagedInputFile = stagePath.resolve(inputFileName);
+        FilePaths(DirectoryPaths dirPaths, String outputPrefix, String inputFileName) {
+            inputFile = dirPaths.inputPath.resolve(inputFileName);
+            stagedInputFile = dirPaths.stagePath.resolve(inputFileName);
 
             String outputFileName = outputPrefix + inputFileName;
-            outputFile = outputPath.resolve(outputFileName);
-            stagedOutputFile = stagePath.resolve(outputFileName);
+            outputFile = dirPaths.outputPath.resolve(outputFileName);
+            stagedOutputFile = dirPaths.stagePath.resolve(outputFileName);
         }
     }
+
+
+    private static Path getPath(JSONObject data, String key, String type) {
+        Path path = Paths.get(data.getString(key));
+        if (path.toString().isEmpty()) {
+            throw new IllegalArgumentException("empty " + type + " path");
+        }
+        return path;
+    }
+
 
     @Override
     public EngineData executeGroup(Set<EngineData> inputs) {
@@ -387,9 +406,7 @@ public class DataManager implements Engine {
 
     @Override
     public void reset() {
-        inputPath = Paths.get(baseDir, "data", "in");
-        outputPath = Paths.get(baseDir, "data", "out");
-        stagePath = Paths.get("/scratch");
+        directoryPaths = new DirectoryPaths(baseDir);
         outputPrefix = "out_";
     }
 
