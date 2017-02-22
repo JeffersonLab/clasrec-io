@@ -74,36 +74,36 @@ public class DataManagerTest {
 
 
     @Test
-    public void configReturnsErrorOnInvalidInputPath() throws Exception {
+    public void configReturnsErrorOnEmptyInputPath() throws Exception {
         EngineData config = createJsonRequest(data -> {
             data.put("input_path", "");
             data.put("output_path", "/mnt/exp/out");
         });
 
-        assertErrorOnConfig(config, "invalid path");
+        assertErrorOnConfig(config, "empty input");
     }
 
 
     @Test
-    public void configReturnsErrorOnInvalidOutputPath() throws Exception {
+    public void configReturnsErrorOnEmptyOutputPath() throws Exception {
         EngineData config = createJsonRequest(data -> {
             data.put("input_path", "/mnt/exp/out");
             data.put("output_path", "");
         });
 
-        assertErrorOnConfig(config, "invalid path");
+        assertErrorOnConfig(config, "empty output");
     }
 
 
     @Test
-    public void configReturnsErrorOnInvalidStagePath() throws Exception {
+    public void configReturnsErrorOnEmptyStagePath() throws Exception {
         EngineData config = createJsonRequest(data -> {
             data.put("input_path", "/mnt/exp/in");
             data.put("output_path", "/mnt/exp/out");
             data.put("stage_path", "");
         });
 
-        assertErrorOnConfig(config, "invalid path");
+        assertErrorOnConfig(config, "empty stage");
     }
 
 
@@ -122,7 +122,7 @@ public class DataManagerTest {
         EngineData config = new EngineData();
         config.setData("text/string", "bad config");
 
-        assertErrorOnConfig(config, "Wrong mimetype: text/string");
+        assertErrorOnConfig(config, "wrong mimetype: text/string");
     }
 
 

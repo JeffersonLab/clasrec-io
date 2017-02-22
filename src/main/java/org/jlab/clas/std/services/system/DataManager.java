@@ -82,8 +82,7 @@ public class DataManager implements Engine {
                 updateConfiguration(data);
                 returnData(output, getConfiguration());
             } catch (IllegalArgumentException e) {
-                String msg = String.format("%s config: invalid path: %s%n",
-                                           NAME, ClaraUtil.reportException(e));
+                String msg = String.format("%s config: %s%n", NAME, e.getMessage());
                 System.err.print(msg);
                 ServiceUtils.setError(output, msg);
             } catch (JSONException e) {
@@ -92,7 +91,7 @@ public class DataManager implements Engine {
                 ServiceUtils.setError(output, msg);
             }
         } else {
-            String msg = String.format("%s config: Wrong mimetype: %s%n", NAME, mt);
+            String msg = String.format("%s config: wrong mimetype: %s%n", NAME, mt);
             System.err.print(msg);
             ServiceUtils.setError(output, msg);
         }
@@ -104,15 +103,15 @@ public class DataManager implements Engine {
             inputPath = Paths.get(data.getString(CONF_INPUT_PATH));
             outputPath = Paths.get(data.getString(CONF_OUTPUT_PATH));
             if (inputPath.toString().isEmpty()) {
-                throw new IllegalArgumentException("Empty input path");
+                throw new IllegalArgumentException("empty input path");
             }
             if (outputPath.toString().isEmpty()) {
-                throw new IllegalArgumentException("Empty input path");
+                throw new IllegalArgumentException("empty output path");
             }
             if (data.has(CONF_STAGE_PATH)) {
                 stagePath = Paths.get(data.getString(CONF_STAGE_PATH));
                 if (stagePath.toString().isEmpty()) {
-                    throw new IllegalArgumentException("Empyt stage path");
+                    throw new IllegalArgumentException("empty stage path");
                 }
             }
 
