@@ -84,6 +84,13 @@ uploadArchives {
 }
 
 
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
+
+
 task distSources(type: Tar, dependsOn: build) {
     extension = 'tar.gz'
     classifier = 'src'
