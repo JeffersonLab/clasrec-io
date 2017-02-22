@@ -335,10 +335,10 @@ public class DataManager implements Engine {
 
     private class FilePaths {
 
-        private Path stagedOutputFile;
-        private Path outputFile;
-        private Path stagedInputFile;
-        private Path inputFile;
+        private final Path stagedOutputFile;
+        private final Path outputFile;
+        private final Path stagedInputFile;
+        private final Path inputFile;
 
         FilePaths(String inputFileName) {
             inputFile = inputPath.resolve(inputFileName);
