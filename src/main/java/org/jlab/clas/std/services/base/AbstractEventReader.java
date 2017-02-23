@@ -49,7 +49,8 @@ public abstract class AbstractEventReader<Reader> implements Engine {
     protected Reader reader;
     private final Object readerLock = new Object();
 
-    private int currentEvent = 1;
+    private int currentEvent;
+    private int lastEvent;
     private int eventCount;
 
     private Set<Integer> processingEvents = new HashSet<Integer>();
@@ -108,19 +109,19 @@ public abstract class AbstractEventReader<Reader> implements Engine {
 
 
     private void setLimits(JSONObject configData) throws EventReaderException {
-        int totalEvents = readEventCount();
-        int skipEvents = getValue(configData, CONF_EVENTS_SKIP, 0, 0, totalEvents);
+        eventCount = readEventCount();
+        int skipEvents = getValue(configData, CONF_EVENTS_SKIP, 0, 0, eventCount);
         if (skipEvents != 0) {
             System.out.printf("%s config: set to skip first %d events%n", name, skipEvents);
         }
         currentEvent = skipEvents;
 
-        int remEvents = totalEvents - skipEvents;
+        int remEvents = eventCount - skipEvents;
         int maxEvents = getValue(configData, CONF_EVENTS_MAX, remEvents, 0, remEvents);
         if (maxEvents != remEvents) {
             System.out.printf("%s config: set to read %d events%n", name, maxEvents);
         }
-        eventCount = skipEvents + maxEvents;
+        lastEvent = skipEvents + maxEvents;
 
         processingEvents.clear();
         eofRequestCount = 0;
@@ -211,7 +212,7 @@ public abstract class AbstractEventReader<Reader> implements Engine {
             }
             if (reader == null) {
                 ServiceUtils.setError(output, openError, 1);
-            } else if (currentEvent < eventCount) {
+            } else if (currentEvent < lastEvent) {
                 returnNextEvent(output);
             } else {
                 ServiceUtils.setError(output, END_OF_FILE, 1);
