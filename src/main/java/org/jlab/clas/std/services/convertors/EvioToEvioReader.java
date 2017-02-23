@@ -46,7 +46,7 @@ public class EvioToEvioReader extends AbstractEventReader<EvioCompactReader> {
     @Override
     public Object readEvent(int eventNumber) throws EventReaderException {
         try {
-            return reader.getEventBuffer(eventNumber, true);
+            return reader.getEventBuffer(++eventNumber, true);
         } catch (EvioException e) {
             throw new EventReaderException(e);
         }

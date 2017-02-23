@@ -46,7 +46,7 @@ public class HipoToHipoReader extends AbstractEventReader<HipoReader> {
     @Override
     public Object readEvent(int eventNumber) throws EventReaderException {
         try {
-            return reader.readHipoEvent(eventNumber - 1);
+            return reader.readHipoEvent(eventNumber);
         } catch (Exception e) {
             throw new EventReaderException(e);
         }

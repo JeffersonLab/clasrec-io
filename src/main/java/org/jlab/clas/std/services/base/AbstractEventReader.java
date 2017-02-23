@@ -92,7 +92,7 @@ public abstract class AbstractEventReader<Reader> implements Engine {
             try {
                 reader = createReader(Paths.get(fileName), configData);
                 eventCount = readEventCount();
-                currentEvent = 1;
+                currentEvent = 0;
                 processingEvents.clear();
                 eofRequestCount = 0;
                 System.out.printf("%s service: Opened file %s%n", name, fileName);
@@ -174,7 +174,9 @@ public abstract class AbstractEventReader<Reader> implements Engine {
             }
             if (reader == null) {
                 ServiceUtils.setError(output, openError, 1);
-            } else if (currentEvent > eventCount) {
+            } else if (currentEvent < eventCount) {
+                returnNextEvent(output);
+            } else {
                 ServiceUtils.setError(output, END_OF_FILE, 1);
                 if (fromRec) {
                     if (processingEvents.isEmpty()) {
@@ -187,8 +189,6 @@ public abstract class AbstractEventReader<Reader> implements Engine {
                 } else {
                     output.setData(EngineDataType.SFIXED32.mimeType(), EOF_NOT_FROM_WRITER);
                 }
-            } else {
-                returnNextEvent(output);
             }
         }
     }
