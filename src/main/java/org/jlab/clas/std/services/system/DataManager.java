@@ -365,6 +365,10 @@ public class DataManager implements Engine {
         if (path.toString().isEmpty()) {
             throw new IllegalArgumentException("empty " + type + " path");
         }
+        if (Files.exists(path) && !Files.isDirectory(path)) {
+            String msg = String.format("%s path %s exists but not a directory", type, path);
+            throw new IllegalArgumentException(msg);
+        }
         return path;
     }
 

@@ -4,6 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -104,6 +107,51 @@ public class DataManagerTest {
         });
 
         assertErrorOnConfig(config, "empty stage");
+    }
+
+
+    @Test
+    public void configReturnsErrorWhenIntputPathExistsAndNotDirectory() throws Exception {
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", tempFile());
+            data.put("output_path", "/mnt/exp/out");
+        });
+
+        assertErrorOnConfig(config, "not a directory");
+    }
+
+
+    @Test
+    public void configReturnsErrorWhenOutputPathExistsAndNotDirectory() throws Exception {
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "/mnt/exp/in");
+            data.put("output_path", tempFile());
+        });
+
+        assertErrorOnConfig(config, "not a directory");
+    }
+
+
+    @Test
+    public void configReturnsErrorWhenStagePathExistsAndNotDirectory() throws Exception {
+        EngineData config = createJsonRequest(data -> {
+            data.put("input_path", "/mnt/exp/in");
+            data.put("output_path", "/mnt/exp/out");
+            data.put("stage_path", tempFile());
+        });
+
+        assertErrorOnConfig(config, "not a directory");
+    }
+
+
+    private static String tempFile() {
+        try {
+            Path temp = Files.createTempFile("notdir", null);
+            temp.toFile().deleteOnExit();
+            return temp.toString();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 
