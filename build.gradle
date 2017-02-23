@@ -1,11 +1,13 @@
-apply plugin: 'java'
-apply plugin: 'maven'
+plugins {
+    id 'java'
+    id 'maven'
 
-apply plugin: 'checkstyle'
-apply plugin: 'findbugs'
+    id 'checkstyle'
+    id 'findbugs'
 
-apply plugin: 'eclipse'
-apply plugin: 'idea'
+    id 'eclipse'
+    id 'idea'
+}
 
 
 group = 'org.jlab.clas'
