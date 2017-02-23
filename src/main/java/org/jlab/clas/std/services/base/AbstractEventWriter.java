@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 import org.jlab.clara.base.ClaraUtil;
-import org.jlab.clara.base.core.ClaraConstants;
 import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
@@ -28,13 +27,14 @@ public abstract class AbstractEventWriter<Writer> implements Engine {
     private static final String OUTPUT_NEXT = "next-rec";
     private static final String EVENT_SKIP = "skip";
 
+    private static final String NO_NAME = "";
     private static final String NO_FILE = "No open file";
 
     // Experimental specification file
     private final EngineSpecification info = new EngineSpecification(this.getClass());
     private final String name = info.name();
 
-    private String fileName = ClaraConstants.UNDEFINED;
+    private String fileName = NO_NAME;
     private boolean skipEvents = false;
 
     private String openError = NO_FILE;

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jlab.clara.base.ClaraUtil;
-import org.jlab.clara.base.core.ClaraConstants;
 import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
@@ -32,6 +31,7 @@ public abstract class AbstractEventReader<Reader> implements Engine {
     private static final String REQUEST_ORDER = "order";
     private static final String REQUEST_COUNT = "count";
 
+    private static final String NO_NAME = "";
     private static final String NO_FILE = "No open file";
     private static final String END_OF_FILE = "End of file";
 
@@ -43,7 +43,7 @@ public abstract class AbstractEventReader<Reader> implements Engine {
     private final String name = info.name();
 
 
-    private String fileName = ClaraConstants.UNDEFINED;
+    private String fileName = NO_NAME;
     private String openError = NO_FILE;
 
     protected Reader reader;
