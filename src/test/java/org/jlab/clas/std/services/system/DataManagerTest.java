@@ -212,6 +212,29 @@ public class DataManagerTest {
 
 
     @Test
+    public void executeStagesInputFileIntoExistingSymlinkDirectory() throws Exception {
+        TestPaths paths = setTestDirectories(p -> {
+            p.stageDir = getSymlink(p.stageDir);
+            p.stagedInputFile = Paths.get(p.stageDir.toString(),
+                                          p.stagedInputFile.getFileName().toString());
+        });
+
+        assertThat("Stage directory is link", Files.isSymbolicLink(paths.stageDir), is(true));
+
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "stage_input");
+            data.put("file", paths.inputFile.getFileName().toString());
+        });
+
+        EngineData result = dm.execute(request);
+
+        assertThat("Result is not an error", result.getStatus(), is(not(EngineStatus.ERROR)));
+        assertThat("Staged input exists", paths.stagedInputFile.toFile().exists(), is(true));
+    }
+
+
+    @Test
     public void executeRemovesStagedInputFile() throws Exception {
         TestPaths paths = setTestDirectories();
         Files.copy(paths.inputFile, paths.stagedInputFile);
@@ -259,6 +282,32 @@ public class DataManagerTest {
 
         assertThat("Staged output exists", paths.stagedOutputFile.toFile().exists(), is(true));
         assertThat("Saved output exists", paths.outputFile.toFile().exists(), is(false));
+
+        EngineData request = createJsonRequest(data -> {
+            data.put("type", "exec");
+            data.put("action", "save_output");
+            data.put("file", paths.inputFile.getFileName().toString());
+        });
+
+        EngineData result = dm.execute(request);
+
+        assertThat("Result is not an error", result.getStatus(), is(not(EngineStatus.ERROR)));
+        assertThat("Staged output exists", paths.stagedOutputFile.toFile().exists(), is(false));
+        assertThat("Saved output exists", paths.outputFile.toFile().exists(), is(true));
+    }
+
+
+    @Test
+    public void executeSavesOutputFileIntoExistingSymlinkDirectory() throws Exception {
+        TestPaths paths = setTestDirectories(p -> {
+            p.outputDir = getSymlink(p.outputDir);
+            p.outputFile = Paths.get(p.outputDir.toString(),
+                                     p.outputFile.getFileName().toString());
+        });
+
+        Files.copy(paths.inputFile, paths.stagedOutputFile);
+
+        assertThat("Output directory is link", Files.isSymbolicLink(paths.outputDir), is(true));
 
         EngineData request = createJsonRequest(data -> {
             data.put("type", "exec");
@@ -326,6 +375,11 @@ public class DataManagerTest {
 
 
     private TestPaths setTestDirectories() throws Exception {
+        return setTestDirectories(paths -> { });
+    }
+
+
+    private TestPaths setTestDirectories(Consumer<TestPaths> editPaths) throws Exception {
         TestPaths paths = new TestPaths();
 
         paths.inputDir = Paths.get(testFilePath).getParent();
@@ -346,6 +400,8 @@ public class DataManagerTest {
         paths.stagedInputFile.toFile().deleteOnExit();
         paths.stagedOutputFile.toFile().deleteOnExit();
 
+        editPaths.accept(paths);
+
         EngineData config = createJsonRequest(data -> {
             data.put("input_path", paths.inputDir.toString());
             data.put("output_path", paths.outputDir.toString());
@@ -355,6 +411,21 @@ public class DataManagerTest {
         dm.configure(config);
 
         return paths;
+    }
+
+
+    private Path getSymlink(Path target) {
+        try {
+            Path baseDir = Files.createTempDirectory("base");
+            baseDir.toFile().deleteOnExit();
+
+            Path link = Paths.get(baseDir.toString(), "link");
+            link.toFile().deleteOnExit();
+
+            return Files.createSymbolicLink(link, target);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 

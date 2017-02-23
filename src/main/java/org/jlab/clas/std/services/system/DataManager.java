@@ -208,7 +208,7 @@ public class DataManager implements Engine {
         Path stagePath = files.stagedInputFile.getParent();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            Files.createDirectories(stagePath);
+            FileUtils.createDirectories(stagePath);
 
             CommandLine cmdLine = new CommandLine("cp");
             cmdLine.addArgument(files.inputFile.toString());
@@ -260,7 +260,7 @@ public class DataManager implements Engine {
         Path outputPath = files.outputFile.getParent();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            Files.createDirectories(outputPath);
+            FileUtils.createDirectories(outputPath);
 
             CommandLine cmdLine = new CommandLine("mv");
             cmdLine.addArgument(files.stagedOutputFile.toString());
