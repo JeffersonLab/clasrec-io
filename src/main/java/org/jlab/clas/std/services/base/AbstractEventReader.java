@@ -13,6 +13,7 @@ import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineSpecification;
 import org.jlab.clas.std.services.util.ServiceUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public abstract class AbstractEventReader<Reader> implements Engine {
@@ -22,6 +23,9 @@ public abstract class AbstractEventReader<Reader> implements Engine {
 
     private static final String CONF_ACTION_OPEN = "open";
     private static final String CONF_ACTION_CLOSE = "close";
+
+    private static final String CONF_EVENTS_SKIP = "skip";
+    private static final String CONF_EVENTS_MAX = "max";
 
     private static final String REQUEST_NEXT = "next";
     private static final String REQUEST_NEXT_REC = "next-rec";
@@ -91,10 +95,7 @@ public abstract class AbstractEventReader<Reader> implements Engine {
             System.out.printf("%s service: Request to open file %s%n", name, fileName);
             try {
                 reader = createReader(Paths.get(fileName), configData);
-                eventCount = readEventCount();
-                currentEvent = 0;
-                processingEvents.clear();
-                eofRequestCount = 0;
+                setLimits(configData);
                 System.out.printf("%s service: Opened file %s%n", name, fileName);
             } catch (EventReaderException e) {
                 openError = String.format("Error opening the file %s%n%s",
@@ -103,6 +104,42 @@ public abstract class AbstractEventReader<Reader> implements Engine {
                 fileName = null;
             }
         }
+    }
+
+
+    private void setLimits(JSONObject configData) throws EventReaderException {
+        int totalEvents = readEventCount();
+        int skipEvents = getValue(configData, CONF_EVENTS_SKIP, 0, 0, totalEvents);
+        if (skipEvents != 0) {
+            System.out.printf("%s config: set to skip first %d events%n", name, skipEvents);
+        }
+        currentEvent = skipEvents;
+
+        int remEvents = totalEvents - skipEvents;
+        int maxEvents = getValue(configData, CONF_EVENTS_MAX, remEvents, 0, remEvents);
+        if (maxEvents != remEvents) {
+            System.out.printf("%s config: set to read %d events%n", name, maxEvents);
+        }
+        eventCount = skipEvents + maxEvents;
+
+        processingEvents.clear();
+        eofRequestCount = 0;
+    }
+
+
+    private int getValue(JSONObject configData, String key, int defVal, int minVal, int maxVal) {
+        if (configData.has(key)) {
+            try {
+                int value = configData.getInt(key);
+                if (value >= minVal && value <= maxVal) {
+                    return value;
+                }
+                System.err.printf("%s config: invalid value for '%s': %d%n", name, key, value);
+            } catch (JSONException e) {
+                System.err.printf("%s config: %s%n", name, e.getMessage());
+            }
+        }
+        return defVal;
     }
 
 
