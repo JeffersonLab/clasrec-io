@@ -167,7 +167,10 @@ public class DataManager implements Engine {
     private void runAction(JSONObject request, EngineData output) {
         String action = request.getString(REQUEST_ACTION);
         String inputFileName = request.getString(REQUEST_FILENAME);
-
+        if (inputFileName.isEmpty()) {
+            ServiceUtils.setError(output, "Empty input file name");
+            return;
+        }
         FilePaths files = new FilePaths(directoryPaths, outputPrefix, inputFileName);
         Path resolvedFileName = files.inputFile.getFileName();
         if (resolvedFileName == null || !inputFileName.equals(resolvedFileName.toString())) {
