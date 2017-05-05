@@ -24,7 +24,9 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
     protected HipoWriter createWriter(Path file, JSONObject opts) throws EventWriterException {
         try {
             HipoWriter writer = new HipoWriter();
-            writer.setCompressionType(getCompression(opts));
+            int compression = getCompression(opts);
+            System.out.printf("%s service: using compression level %d%n", getName(), compression);
+            writer.setCompressionType(compression);
             writer.getSchemaFactory().initFromDirectory(getSchemaDirectory(opts));
             writer.open(file.toString());
             return writer;
