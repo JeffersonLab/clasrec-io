@@ -6,8 +6,8 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 
 import org.jlab.clara.engine.EngineDataType;
-import org.jlab.clas.std.services.base.AbstractEventWriter;
-import org.jlab.clas.std.services.base.EventWriterException;
+import org.jlab.clara.std.services.AbstractEventWriterService;
+import org.jlab.clara.std.services.EventWriterException;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.coda.jevio.EventWriter;
 import org.jlab.coda.jevio.EvioException;
@@ -19,7 +19,7 @@ import org.json.JSONObject;
  * (i.e. writes EvIO events to an output file).
  * Supports evio-4.1 version.
  */
-public class EvioToEvioWriter extends AbstractEventWriter<EventWriter> {
+public class EvioToEvioWriter extends AbstractEventWriterService<EventWriter> {
 
     private static final String CONF_ORDER = "order";
     private static final String CONF_OVERWRITE = "overwrite";

@@ -4,8 +4,8 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 
 import org.jlab.clara.engine.EngineDataType;
-import org.jlab.clas.std.services.base.AbstractEventReader;
-import org.jlab.clas.std.services.base.EventReaderException;
+import org.jlab.clara.std.services.AbstractEventReaderService;
+import org.jlab.clara.std.services.EventReaderException;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.hipo.io.HipoReader;
 import org.json.JSONObject;
@@ -14,7 +14,7 @@ import org.json.JSONObject;
  * Service that converts HIPO persistent data to HIPO transient data
  * (i.e. reads HIPO events from an input file)
  */
-public class HipoToHipoReader extends AbstractEventReader<HipoReader> {
+public class HipoToHipoReader extends AbstractEventReaderService<HipoReader> {
 
     @Override
     protected HipoReader createReader(Path file, JSONObject opts)

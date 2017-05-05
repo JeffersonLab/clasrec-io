@@ -3,8 +3,8 @@ package org.jlab.clas.std.services.convertors;
 import java.nio.file.Path;
 
 import org.jlab.clara.engine.EngineDataType;
-import org.jlab.clas.std.services.base.AbstractEventWriter;
-import org.jlab.clas.std.services.base.EventWriterException;
+import org.jlab.clara.std.services.AbstractEventWriterService;
+import org.jlab.clara.std.services.EventWriterException;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.hipo.data.HipoEvent;
 import org.jlab.hipo.io.HipoWriter;
@@ -15,7 +15,7 @@ import org.json.JSONObject;
  * Service that converts HIPO transient data to HIPO persistent data
  * (i.e. writes HIPO events to an output file).
  */
-public class HipoToHipoWriter extends AbstractEventWriter<HipoWriter> {
+public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
 
     private static final String CONF_COMPRESSION = "compression";
     private static final String CONF_SCHEMA = "schema_dir";

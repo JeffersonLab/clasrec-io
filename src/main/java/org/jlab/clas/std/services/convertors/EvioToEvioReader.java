@@ -5,8 +5,8 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 
 import org.jlab.clara.engine.EngineDataType;
-import org.jlab.clas.std.services.base.AbstractEventReader;
-import org.jlab.clas.std.services.base.EventReaderException;
+import org.jlab.clara.std.services.AbstractEventReaderService;
+import org.jlab.clara.std.services.EventReaderException;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.coda.jevio.EvioCompactReader;
 import org.jlab.coda.jevio.EvioException;
@@ -16,7 +16,7 @@ import org.json.JSONObject;
  * Converter service that converts EvIO persistent data to EvIO transient data
  * (i.e. Reads EvIO events from an input file)
  */
-public class EvioToEvioReader extends AbstractEventReader<EvioCompactReader> {
+public class EvioToEvioReader extends AbstractEventReaderService<EvioCompactReader> {
 
     @Override
     protected EvioCompactReader createReader(Path file, JSONObject opts)
