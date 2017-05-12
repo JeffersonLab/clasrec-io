@@ -49,7 +49,9 @@ dependencies {
 
 
 javadoc {
-    options.addStringOption('Xdoclint:none', '-quiet')
+    options.charSet = 'utf8'
+    options.encoding = 'utf8'
+    options.docEncoding = 'utf8'
 }
 
 task javadocJar(type: Jar) {
