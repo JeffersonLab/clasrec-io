@@ -27,7 +27,6 @@ configurations {
 
 
 repositories {
-    mavenLocal()
     maven {
         url 'http://clasweb.jlab.org/clas12maven/'
     }
