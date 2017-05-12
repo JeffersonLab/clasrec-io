@@ -91,30 +91,6 @@ test {
 }
 
 
-task distSources(type: Tar, dependsOn: build) {
-    extension = 'tar.gz'
-    classifier = 'src'
-    compression = Compression.GZIP
-
-    into "${baseName}-${version}-${classifier}"
-
-    from 'README.md'
-    from 'build.gradle'
-    from 'gradlew'
-    from 'gradlew.bat'
-
-    from ('config') {
-        into 'config'
-    }
-    from ('gradle') {
-        into 'gradle'
-    }
-    from ('src') {
-        into 'src'
-    }
-}
-
-
 def deploySpec = copySpec {
     into ('plugins/clas12/lib/clas') {
         from configurations.runtime
