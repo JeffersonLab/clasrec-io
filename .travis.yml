@@ -13,3 +13,6 @@ matrix:
   include:
     - os: linux
       jdk: oraclejdk8
+
+script:
+  - ./gradlew check findbugs
