@@ -117,7 +117,7 @@ task deploy(type: Copy, overwrite: true, dependsOn: jar) {
 
 
 checkstyle {
-    toolVersion = '6.19'
+    toolVersion = '8.0'
     configFile = file('config/quality/checkstyle.xml')
 }
 
