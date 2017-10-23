@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class Benchmark1 implements Engine {
 
     private static final String NAME = "Benchmark1";
@@ -81,6 +83,7 @@ public class Benchmark1 implements Engine {
     }
 
 
+    @SuppressFBWarnings(value = "UC_USELESS_VOID_METHOD")
     private void runArray() {
         int size = this.size;
         int iter = this.iter;
@@ -126,6 +129,7 @@ public class Benchmark1 implements Engine {
     }
 
 
+    @SuppressFBWarnings(value = "UC_USELESS_VOID_METHOD")
     private void runList() {
         int size = this.size / 2;
         int iter = this.iter * 2;
