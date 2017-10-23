@@ -123,7 +123,7 @@ checkstyle {
 
 findbugs {
     toolVersion = '3.0.1'
-    effort = 'default'
+    effort = 'max'
     reportLevel = 'medium'
     excludeFilter = file('config/quality/findbugs-exclude.xml')
 }

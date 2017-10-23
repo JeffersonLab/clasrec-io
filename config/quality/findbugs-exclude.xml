@@ -1,14 +1,22 @@
 <FindBugsFilter>
+  <!-- Exclude internationalization -->
   <Match>
-    <!-- Exclude Internationalization -->
     <Bug category="I18N" />
   </Match>
+
+  <!-- Exclude name checks (CheckStyle is used for that) -->
   <Match>
-    <!-- Exclude Filter Malicious code vulnerability -->
-    <Bug code="DP,EI,EI2,FI,MS" />
+    <Bug code="Nm" />
   </Match>
+
+  <!-- Exclude malicious code category from tests -->
   <Match>
-    <!-- Include 1 to 15 -->
-    <Rank value="16" />
+    <Class name="~.*\.*Test" />
+    <Bug category="MALICIOUS_CODE" />
+  </Match>
+
+  <!-- Include 1 to 16 -->
+  <Match>
+    <Rank value="17" />
   </Match>
 </FindBugsFilter>
