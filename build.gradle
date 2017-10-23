@@ -129,16 +129,6 @@ findbugs {
     excludeFilter = file('config/quality/findbugs-exclude.xml')
 }
 
-task checkstyleHtml {
-    doLast {
-        ant.xslt(in: checkstyleMain.reports.xml.destination,
-                style: file('config/quality/checkstyle-noframes-sorted.xsl'),
-                out: file("${checkstyleMain.reports.xml.destination.parent}/main.html"))
-    }
-}
-
-checkstyleMain.finalizedBy checkstyleHtml
-
 tasks.withType(FindBugs) {
     reports {
         xml.enabled = false
