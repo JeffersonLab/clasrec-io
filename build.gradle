@@ -29,6 +29,9 @@ configurations {
 
 repositories {
     maven {
+        url 'https://clasweb.jlab.org/jhep/maven/'
+    }
+    maven {
         url 'https://clasweb.jlab.org/clas12maven/'
     }
     mavenCentral()
@@ -37,8 +40,8 @@ repositories {
 
 dependencies {
     compileOnly 'org.jlab.coda:jclara:4.3-SNAPSHOT'
-    compile 'org.hep.hipo:hipo:2.0-SNAPSHOT'
-    compile 'org.jlab.coda:jevio:4.4.6'
+    compile 'org.jlab.jnp:jnp-hipo:1.0-SNAPSHOT'
+    compile 'org.jlab.coda:jevio:6.0-SNAPSHOT'
     compile 'org.json:json:20160810'
     compileOnly 'com.google.code.findbugs:findbugs-annotations:3.0.1'
     deployerJars 'org.apache.maven.wagon:wagon-ssh-external:2.12'

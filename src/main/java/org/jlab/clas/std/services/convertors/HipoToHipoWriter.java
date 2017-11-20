@@ -6,9 +6,9 @@ import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.std.services.AbstractEventWriterService;
 import org.jlab.clara.std.services.EventWriterException;
 import org.jlab.clas.std.services.util.Clas12Types;
-import org.jlab.hipo.data.HipoEvent;
-import org.jlab.hipo.io.HipoWriter;
-import org.jlab.hipo.utils.FileUtils;
+import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.io.HipoWriter;
+import org.jlab.jnp.utils.file.FileUtils;
 import org.json.JSONObject;
 
 /**

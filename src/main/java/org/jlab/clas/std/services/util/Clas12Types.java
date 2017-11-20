@@ -3,7 +3,7 @@ package org.jlab.clas.std.services.util;
 import org.jlab.clara.base.error.ClaraException;
 import org.jlab.clara.engine.ClaraSerializer;
 import org.jlab.clara.engine.EngineDataType;
-import org.jlab.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.data.HipoEvent;
 
 import java.nio.ByteBuffer;
 
