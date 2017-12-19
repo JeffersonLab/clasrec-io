@@ -1,0 +1,11 @@
+---
+name: EtRingToHipoReader
+engine: org.jlab.clas.std.services.convertors.EtRingToHipoReader
+type: java
+
+author: Sebastián Mancilla
+email: smancill@jlab.org
+
+version: 0.5
+description:
+  Converts ET ring EVIO events to HIPO transient events.
