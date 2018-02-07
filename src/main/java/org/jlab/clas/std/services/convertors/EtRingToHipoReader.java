@@ -20,11 +20,16 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.jnp.hipo.data.HipoEvent;
 import org.json.JSONObject;
+//import org.rcdb.JDBCProvider;
+//import org.rcdb.RCDB;
 
 import java.io.Closeable;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -41,16 +46,27 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
     private static final String CONF_PORT = "port";
     private static final String CONF_TORUS = "torus";
     private static final String CONF_SOLENOID = "solenoid";
-
+    private static final String CONF_RUN = "run";
+    private static final String CONF_DEBUG = "debug";
+    private PrintStream original = System.out;
 
     @Override
     protected EtRingToHipoReader.EtReader
-            createReader(Path file, JSONObject opts) throws EventReaderException {
+    createReader(Path file, JSONObject opts) throws EventReaderException {
+        if(getDebug(opts) == 0){
+            System.setOut(new PrintStream(new OutputStream() {
+                public void write(int b) {
+                    //DO NOTHING
+                }
+            }));
+        } else {
+            System.setOut(original);
+        }
         try {
-
             return new EtReader(getEtSystem(opts),
                 getEtHost(opts),
                 getEtPort(opts),
+                getRunNumber(opts),
                 getTorusField(opts),
                 getSolenoidField(opts));
         } catch (Exception e) {
@@ -100,8 +116,9 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
         private static final Integer MAX_NEVENTS = 10;
         private static final Integer TIMEOUT = 2000000;
         private static final Integer QSIZE = 10;
+        private int runNumber;
         private float torusField;
-        private float solenoidFiled;
+        private float solenoidField;
 
         private final EtSystem sys;
         private final EtAttachment att;
@@ -110,10 +127,11 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
         private EvioDataDictionary dict = null;
         private final Queue<HipoEvent> evQueue = new LinkedList<>();
 
-        EtReader(String system, String host, int port,
-                 float torusfield, float solenoidField) throws Exception {
-            this.torusField = torusfield;
-            this.solenoidFiled = solenoidField;
+        EtReader(String system, String host, int port, int runNumber,
+                 float torusField, float solenoidField) throws Exception {
+            this.runNumber = runNumber;
+            this.torusField = torusField;
+            this.solenoidField = solenoidField;
             EtSystemOpenConfig config = new EtSystemOpenConfig(system, host, port);
             config.setConnectRemotely(true);
             sys = new EtSystem(config, EtConstants.debugInfo);
@@ -127,6 +145,10 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
             dict.initWithEnv("CLAS12DIR", "/etc/bankdefs/clas12");
             EtStation stat = sys.createStation(statConfig, DEFAULT_STAT_NAME);
             att = sys.attach(stat);
+
+            System.out.println("INFO: Start processing with runNumber = " + runNumber
+                + ", torus = " + this.torusField
+                + ", solenoid = " + this.solenoidField);
         }
 
         HipoEvent getEvent() throws Exception {
@@ -183,8 +205,35 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
 
                         // ----------- HIPO
                         DataEvent decodedEvent = decoder.getDataEvent(eventEv);
+
+/*
+                        // get run number from the EtEvent
+                        HipoDataBank tmpBank = decoder.createHeaderBank(
+                            decodedEvent, -1, 10, torusField, solenoidField);
+                        int tmpRn = tmpBank.getInt("run", 0);
+                        // check if run number is changed
+                        if (tmpRn != runNumber) {
+                            runNumber = tmpRn;
+                            // go to RCDB and get torus and solenoid scales
+                            JDBCProvider
+                                provider = RCDB.createProvider("mysql://rcdb@clasdb.jlab.org/rcdb");
+                            provider.connect();
+
+                            solenoidField =
+                                (float) provider.getCondition(runNumber, "solenoid_scale").toDouble();
+                            torusField =
+                                (float) provider.getCondition(runNumber, "torus_scale").toDouble();
+                            provider.close();
+                            System.out.println("INFO: Processing conditions change. ======> runNumber = "
+                                + runNumber
+                                + ", torus = " + torusField
+                                + ", solenoid = " + solenoidField);
+                        }
+*/
+
                         DataBank header = decoder.createHeaderBank(
-                                decodedEvent, 2379, 10, torusField, solenoidFiled);
+                            decodedEvent, runNumber, 10, torusField, solenoidField);
+
                         decodedEvent.appendBanks(header);
 
                         HipoDataEvent hipo = (HipoDataEvent) decodedEvent;
@@ -224,11 +273,21 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
         return opts.has(CONF_PORT) ? opts.getInt(CONF_PORT) : EtConstants.serverPort;
     }
 
+    private static int getRunNumber(JSONObject opts) {
+        return opts.has(CONF_RUN) ? opts.getInt(CONF_RUN) : 999;
+    }
+
     private static float getTorusField(JSONObject opts) {
         return opts.has(CONF_TORUS) ? (float) opts.getDouble(CONF_TORUS) : (float) -1.0;
     }
 
     private static float getSolenoidField(JSONObject opts) {
-        return opts.has(CONF_SOLENOID) ? (float) opts.getDouble(CONF_SOLENOID) : (float) 1.0;
+        return opts.has(CONF_SOLENOID) ? (float) opts.getDouble(CONF_SOLENOID) : (float) -1.0;
     }
+
+    private static int getDebug(JSONObject opts) {
+        return opts.has(CONF_DEBUG) ? opts.getInt(CONF_DEBUG) : 1;
+    }
+
+
 }
