@@ -20,7 +20,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.jnp.hipo.data.HipoEvent;
 import org.json.JSONObject;
@@ -28,8 +27,6 @@ import org.json.JSONObject;
 //import org.rcdb.RCDB;
 
 import java.io.Closeable;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -47,21 +44,24 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
     private static final String CONF_TORUS = "torus";
     private static final String CONF_SOLENOID = "solenoid";
     private static final String CONF_RUN = "run";
-    private static final String CONF_DEBUG = "debug";
-    private PrintStream original = System.out;
+    private static final String CONF_NEVENT = "nevents";
+//    private PrintStream original = System.out;
+    private int n_events;
 
     @Override
     protected EtRingToHipoReader.EtReader
     createReader(Path file, JSONObject opts) throws EventReaderException {
-        if(getDebug(opts) == 0){
-            System.setOut(new PrintStream(new OutputStream() {
-                public void write(int b) {
-                    //DO NOTHING
-                }
-            }));
-        } else {
-            System.setOut(original);
-        }
+        n_events = getNumberOfEvents(opts);
+
+//        if(getDebug(opts) == 0){
+//            System.setOut(new PrintStream(new OutputStream() {
+//                public void write(int b) {
+//                    //DO NOTHING
+//                }
+//            }));
+//        } else {
+//            System.setOut(original);
+//        }
         try {
             return new EtReader(getEtSystem(opts),
                 getEtHost(opts),
@@ -81,7 +81,7 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
 
     @Override
     public int readEventCount() throws EventReaderException {
-        return 1000;
+        return n_events;
     }
 
     @Override
@@ -285,8 +285,8 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
         return opts.has(CONF_SOLENOID) ? (float) opts.getDouble(CONF_SOLENOID) : (float) -1.0;
     }
 
-    private static int getDebug(JSONObject opts) {
-        return opts.has(CONF_DEBUG) ? opts.getInt(CONF_DEBUG) : 1;
+    private static int getNumberOfEvents(JSONObject opts) {
+        return opts.has(CONF_NEVENT) ? opts.getInt(CONF_NEVENT) : 1000;
     }
 
 
