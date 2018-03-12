@@ -172,17 +172,14 @@
         <!-- </module> -->
         <module name="UpperEll"/>
 
-        <module name="FileContentsHolder"/>
-
-    </module>
-
-    <module name="SuppressionCommentFilter">
-      <property name="offCommentFormat" value="checkstyle\.off:?$"/>
-      <property name="onCommentFormat" value="checkstyle\.on:?$"/>
-    </module>
-    <module name="SuppressionCommentFilter">
-      <property name="offCommentFormat" value="checkstyle\.off: ([\w\|]+)"/>
-      <property name="onCommentFormat" value="checkstyle\.on: ([\w\|]+)"/>
-      <property name="checkFormat" value="$1"/>
+        <module name="SuppressionCommentFilter">
+          <property name="offCommentFormat" value="checkstyle\.off:?$"/>
+          <property name="onCommentFormat" value="checkstyle\.on:?$"/>
+        </module>
+        <module name="SuppressionCommentFilter">
+          <property name="offCommentFormat" value="checkstyle\.off: ([\w\|]+)"/>
+          <property name="onCommentFormat" value="checkstyle\.on: ([\w\|]+)"/>
+          <property name="checkFormat" value="$1"/>
+        </module>
     </module>
 </module>
