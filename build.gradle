@@ -28,9 +28,9 @@ configurations {
 
 
 repositories {
-flatDir {
-       dirs '/group/da/vhg/testbed/clara/myClara/plugins/clas12/lib/clas'
-   }
+//flatDir {
+//       dirs '/group/da/vhg/testbed/clara/myClara/plugins/clas12/lib/clas'
+//   }
     maven {
         url 'https://clasweb.jlab.org/jhep/maven/'
     }
@@ -57,7 +57,8 @@ dependencies {
     compile 'org.jlab.coda:et:14.0'
     compile 'org.json:json:20160810'
     compileOnly 'com.google.code.findbugs:findbugs-annotations:3.0.1'
-    compileOnly name: 'coat-libs-5.0-SNAPSHOT'
+    compileOnly 'org.jlab.coat:coat-libs:5.1-SNAPSHOT'
+//    compileOnly name: 'coat-libs-5.1-SNAPSHOT'
 //    compileOnly name: 'rcdb'
     deployerJars 'org.apache.maven.wagon:wagon-ssh-external:2.12'
     testCompile 'junit:junit:4.12'

@@ -27,6 +27,8 @@ import org.json.JSONObject;
 //import org.rcdb.RCDB;
 
 import java.io.Closeable;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -45,23 +47,26 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
     private static final String CONF_SOLENOID = "solenoid";
     private static final String CONF_RUN = "run";
     private static final String CONF_NEVENT = "nevents";
-//    private PrintStream original = System.out;
-    private int n_events;
+    private static final String CONF_DEBUG = "debug";
+    //    private PrintStream original = System.out;
+    private int nEvents;
 
     @Override
-    protected EtRingToHipoReader.EtReader
-    createReader(Path file, JSONObject opts) throws EventReaderException {
-        n_events = getNumberOfEvents(opts);
+    protected EtRingToHipoReader.EtReader createReader(Path file, JSONObject opts)
+            throws EventReaderException {
+        nEvents = getNumberOfEvents(opts);
 
-//        if(getDebug(opts) == 0){
-//            System.setOut(new PrintStream(new OutputStream() {
-//                public void write(int b) {
-//                    //DO NOTHING
-//                }
-//            }));
-//        } else {
-//            System.setOut(original);
-//        }
+        PrintStream original = System.out;
+
+        if (getDebug(opts) != 0) {
+            System.setOut(new PrintStream(new OutputStream() {
+                public void write(int b) {
+                    //DO NOTHING
+                }
+            }));
+        } else {
+            System.setOut(original);
+        }
         try {
             return new EtReader(getEtSystem(opts),
                 getEtHost(opts),
@@ -81,7 +86,7 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
 
     @Override
     public int readEventCount() throws EventReaderException {
-        return n_events;
+        return nEvents;
     }
 
     @Override
@@ -146,9 +151,12 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
             EtStation stat = sys.createStation(statConfig, DEFAULT_STAT_NAME);
             att = sys.attach(stat);
 
-            System.out.println("INFO: Start processing with runNumber = " + runNumber
-                + ", torus = " + this.torusField
-                + ", solenoid = " + this.solenoidField);
+            System.out.println("INFO: Start processing with runNumber = "
+                       + runNumber
+                       + ", torus = "
+                       + this.torusField
+                       + ", solenoid = "
+                       + this.solenoidField);
         }
 
         HipoEvent getEvent() throws Exception {
@@ -196,9 +204,6 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
                         evioBuffer.order(buf.order());
 
                         // ------------- EVIO
-//                        System.out.println("------> parsing event # " + mev +
-//                            " width length = " + mev.getLength());
-//                        try {
                         EvioCompactReader reader = new EvioCompactReader(buf);
                         ByteBuffer a = reader.getEventBuffer(1);
                         EvioDataEvent eventEv = new EvioDataEvent(a, dict);
@@ -206,33 +211,8 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
                         // ----------- HIPO
                         DataEvent decodedEvent = decoder.getDataEvent(eventEv);
 
-/*
-                        // get run number from the EtEvent
-                        HipoDataBank tmpBank = decoder.createHeaderBank(
-                            decodedEvent, -1, 10, torusField, solenoidField);
-                        int tmpRn = tmpBank.getInt("run", 0);
-                        // check if run number is changed
-                        if (tmpRn != runNumber) {
-                            runNumber = tmpRn;
-                            // go to RCDB and get torus and solenoid scales
-                            JDBCProvider
-                                provider = RCDB.createProvider("mysql://rcdb@clasdb.jlab.org/rcdb");
-                            provider.connect();
-
-                            solenoidField =
-                                (float) provider.getCondition(runNumber, "solenoid_scale").toDouble();
-                            torusField =
-                                (float) provider.getCondition(runNumber, "torus_scale").toDouble();
-                            provider.close();
-                            System.out.println("INFO: Processing conditions change. ======> runNumber = "
-                                + runNumber
-                                + ", torus = " + torusField
-                                + ", solenoid = " + solenoidField);
-                        }
-*/
-
-                        DataBank header = decoder.createHeaderBank(
-                            decodedEvent, runNumber, 10, torusField, solenoidField);
+                        DataBank header = decoder.createHeaderBank(decodedEvent,
+                                runNumber, 10, torusField, solenoidField);
 
                         decodedEvent.appendBanks(header);
 
@@ -287,6 +267,10 @@ public class EtRingToHipoReader extends AbstractEventReaderService<EtRingToHipoR
 
     private static int getNumberOfEvents(JSONObject opts) {
         return opts.has(CONF_NEVENT) ? opts.getInt(CONF_NEVENT) : 1000;
+    }
+
+    private static int getDebug(JSONObject opts) {
+        return opts.has(CONF_DEBUG) ? opts.getInt(CONF_DEBUG) : 0;
     }
 
 
