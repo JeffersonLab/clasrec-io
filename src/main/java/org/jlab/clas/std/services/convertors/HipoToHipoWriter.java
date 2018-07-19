@@ -24,10 +24,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
     protected HipoWriter createWriter(Path file, JSONObject opts) throws EventWriterException {
         try {
             HipoWriter writer = new HipoWriter();
-            int compression = getCompression(opts);
-            System.out.printf("%s service: using compression level %d%n", getName(), compression);
-            writer.setCompressionType(compression);
-            writer.getSchemaFactory().initFromDirectory(getSchemaDirectory(opts));
+            configure(writer, opts);
             writer.open(file.toString());
             return writer;
         } catch (Exception e) {
@@ -35,16 +32,20 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
         }
     }
 
-    private int getCompression(JSONObject opts) {
-        return opts.has(CONF_COMPRESSION) ? opts.getInt(CONF_COMPRESSION) : 0;
-    }
+    private void configure(HipoWriter writer, JSONObject opts) {
+        if (opts.has(CONF_COMPRESSION)) {
+            int compression = opts.getInt(CONF_COMPRESSION);
+            System.out.printf("%s service: compression level = %d%n", getName(), compression);
+            writer.setCompressionType(compression);
+        }
 
-    private String getSchemaDirectory(JSONObject opts) {
-        return opts.has(CONF_SCHEMA)
-                ? opts.getString(CONF_SCHEMA)
-                : FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo");
+        String schemaDir = FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo");
+        if (opts.has(CONF_SCHEMA)) {
+            schemaDir = opts.getString(CONF_SCHEMA);
+            System.out.printf("%s service: schema directory = %s%n", getName(), schemaDir);
+        }
+        writer.getSchemaFactory().initFromDirectory(schemaDir);
     }
-
 
     @Override
     protected void closeWriter() {
