@@ -18,7 +18,8 @@ import org.json.JSONObject;
 public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
 
     private static final String CONF_COMPRESSION = "compression";
-    private static final String CONF_SCHEMA = "schema_dir";
+    private static final String CONF_SCHEMA_DIR = "schema_dir";
+    private static final String CONF_SCHEMA_FILTER = "schema_filter";
 
     @Override
     protected HipoWriter createWriter(Path file, JSONObject opts) throws EventWriterException {
@@ -40,11 +41,17 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
         }
 
         String schemaDir = FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo");
-        if (opts.has(CONF_SCHEMA)) {
-            schemaDir = opts.getString(CONF_SCHEMA);
+        if (opts.has(CONF_SCHEMA_DIR)) {
+            schemaDir = opts.getString(CONF_SCHEMA_DIR);
             System.out.printf("%s service: schema directory = %s%n", getName(), schemaDir);
         }
         writer.getSchemaFactory().initFromDirectory(schemaDir);
+
+        if (opts.has(CONF_SCHEMA_DIR)) {
+            boolean useFilter = opts.optBoolean(CONF_SCHEMA_FILTER, true);
+            System.out.printf("%s service: schema filter = %b%n", getName(), useFilter);
+            writer.setSchemaFilter(useFilter);
+        }
     }
 
     @Override
