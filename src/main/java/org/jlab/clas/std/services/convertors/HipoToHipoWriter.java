@@ -1,5 +1,7 @@
 package org.jlab.clas.std.services.convertors;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 
 import org.jlab.clara.engine.EngineDataType;
@@ -48,10 +50,21 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
         writer.getSchemaFactory().initFromDirectory(schemaDir);
 
         if (opts.has(CONF_SCHEMA_DIR)) {
-            boolean useFilter = opts.optBoolean(CONF_SCHEMA_FILTER, true);
-            System.out.printf("%s service: schema filter = %b%n", getName(), useFilter);
-            writer.setSchemaFilter(useFilter);
+            try {
+                // previous releases of COATJAVA may not have the setter
+                Method filterSetter = getSchemaFilterSetter();
+                boolean useFilter = opts.optBoolean(CONF_SCHEMA_FILTER, true);
+                System.out.printf("%s service: schema filter = %b%n", getName(), useFilter);
+                filterSetter.invoke(writer, useFilter);
+            } catch (NoSuchMethodException | IllegalAccessException
+                        | IllegalArgumentException | InvocationTargetException e) {
+                System.out.printf("%s service: schema filter not supported%n", getName());
+            }
         }
+    }
+
+    private Method getSchemaFilterSetter() throws NoSuchMethodException, SecurityException {
+        return HipoWriter.class.getMethod("setSchemaFilter", boolean.class);
     }
 
     @Override
