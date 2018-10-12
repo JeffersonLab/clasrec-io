@@ -28,6 +28,9 @@ configurations {
 
 
 repositories {
+//flatDir {
+//       dirs '/group/da/vhg/testbed/clara/myClara/plugins/clas12/lib/clas'
+//   }
     maven {
         url 'https://clasweb.jlab.org/jhep/maven/'
     }
@@ -35,15 +38,29 @@ repositories {
         url 'https://clasweb.jlab.org/clas12maven/'
     }
     mavenCentral()
+    mavenLocal()
 }
 
 
 dependencies {
     compileOnly 'org.jlab.coda:jclara:4.3-SNAPSHOT'
-    compile 'org.jlab.jnp:jnp-hipo:1.0-SNAPSHOT'
-    compile 'org.jlab.coda:jevio:6.0-SNAPSHOT'
+/*
+    compileOnly ('org.jlab.clas:clas-io:5.0-SNAPSHOT') {
+        transitive = false
+    }
+    compileOnly ('org.jlab.clas:clas-detector:5.0-SNAPSHOT') {
+        transitive = false
+    }
+*/
+
+    compile 'org.jlab.jnp:jnp-hipo:1.1-SNAPSHOT'
+    compile 'org.jlab.coda:jevio:6.1-SNAPSHOT'
+    compile 'org.jlab.coda:et:14.0'
     compile 'org.json:json:20160810'
     compileOnly 'com.google.code.findbugs:findbugs-annotations:3.0.1'
+    compileOnly 'org.jlab.coat:coat-libs:5.1-SNAPSHOT'
+//    compileOnly name: 'coat-libs-5.1-SNAPSHOT'
+//    compileOnly name: 'rcdb'
     deployerJars 'org.apache.maven.wagon:wagon-ssh-external:2.12'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
