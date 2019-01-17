@@ -8,8 +8,8 @@ import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.std.services.AbstractEventWriterService;
 import org.jlab.clara.std.services.EventWriterException;
 import org.jlab.clas.std.services.util.Clas12Types;
-import org.jlab.jnp.hipo.data.HipoEvent;
-import org.jlab.jnp.hipo.io.HipoWriter;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.io.HipoWriter;
 import org.jlab.jnp.utils.file.FileUtils;
 import org.json.JSONObject;
 
@@ -75,7 +75,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
         try {
-            writer.writeEvent((HipoEvent) event);
+            writer.addEvent((Event) event);
         } catch (Exception e) {
             throw new EventWriterException(e);
         }

@@ -40,7 +40,7 @@ repositories {
 
 dependencies {
     compileOnly 'org.jlab.coda:jclara:4.3-SNAPSHOT'
-    compile 'org.jlab.jnp:jnp-hipo:1.1-SNAPSHOT'
+    compile 'org.jlab.jnp:jnp-hipo4:4.0-SNAPSHOT'
     compile 'org.jlab.coda:jevio:6.1-SNAPSHOT'
     compile 'org.json:json:20160810'
     compileOnly 'com.google.code.findbugs:findbugs-annotations:3.0.1'

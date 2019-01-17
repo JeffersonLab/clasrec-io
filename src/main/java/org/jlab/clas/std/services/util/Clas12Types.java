@@ -3,7 +3,7 @@ package org.jlab.clas.std.services.util;
 import org.jlab.clara.base.error.ClaraException;
 import org.jlab.clara.engine.ClaraSerializer;
 import org.jlab.clara.engine.EngineDataType;
-import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo4.data.Event;
 
 import java.nio.ByteBuffer;
 
@@ -17,13 +17,15 @@ public final class Clas12Types {
 
         @Override
         public ByteBuffer write(Object data) throws ClaraException {
-            HipoEvent event = (HipoEvent) data;
-            return ByteBuffer.wrap(event.getDataBuffer());
+            Event event = (Event) data;
+            return ByteBuffer.wrap(event.getEventBuffer().array());
         }
 
         @Override
         public Object read(ByteBuffer buffer) throws ClaraException {
-            return new HipoEvent(buffer.array());
+            Event event = new Event(buffer.array().length);
+            event.initFrom(buffer.array());
+            return event;
         }
     }
 

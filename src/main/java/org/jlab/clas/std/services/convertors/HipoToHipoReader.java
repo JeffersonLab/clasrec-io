@@ -7,7 +7,8 @@ import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.std.services.AbstractEventReaderService;
 import org.jlab.clara.std.services.EventReaderException;
 import org.jlab.clas.std.services.util.Clas12Types;
-import org.jlab.jnp.hipo.io.HipoReader;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.io.HipoReader;
 import org.json.JSONObject;
 
 /**
@@ -46,7 +47,8 @@ public class HipoToHipoReader extends AbstractEventReaderService<HipoReader> {
     @Override
     public Object readEvent(int eventNumber) throws EventReaderException {
         try {
-            return reader.readEvent(eventNumber);
+            Event event = new Event();
+            return reader.getEvent(event,eventNumber);
         } catch (Exception e) {
             throw new EventReaderException(e);
         }
