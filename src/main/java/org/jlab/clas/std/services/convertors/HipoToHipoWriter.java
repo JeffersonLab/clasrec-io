@@ -42,7 +42,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
             writer.setCompressionType(compression);
         }
 
-        String schemaDir = FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo");
+        String schemaDir = FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo4");
         if (opts.has(CONF_SCHEMA_DIR)) {
             schemaDir = opts.getString(CONF_SCHEMA_DIR);
             System.out.printf("%s service: schema directory = %s%n", getName(), schemaDir);
