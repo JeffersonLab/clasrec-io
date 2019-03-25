@@ -10,6 +10,7 @@ import org.jlab.clara.std.services.EventWriterException;
 import org.jlab.clas.std.services.util.Clas12Types;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.io.HipoWriter;
+import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 import org.jlab.jnp.utils.file.FileUtils;
 import org.json.JSONObject;
 
@@ -17,16 +18,16 @@ import org.json.JSONObject;
  * Service that converts HIPO transient data to HIPO persistent data
  * (i.e. writes HIPO events to an output file).
  */
-public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
+public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorted> {
 
     private static final String CONF_COMPRESSION = "compression";
     private static final String CONF_SCHEMA_DIR = "schema_dir";
     private static final String CONF_SCHEMA_FILTER = "schema_filter";
 
     @Override
-    protected HipoWriter createWriter(Path file, JSONObject opts) throws EventWriterException {
+    protected HipoWriterSorted createWriter(Path file, JSONObject opts) throws EventWriterException {
         try {
-            HipoWriter writer = new HipoWriter();
+            HipoWriterSorted writer = new HipoWriterSorted();
             configure(writer, opts);
             writer.open(file.toString());
             return writer;
@@ -35,7 +36,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriter> {
         }
     }
 
-    private void configure(HipoWriter writer, JSONObject opts) {
+    private void configure(HipoWriterSorted writer, JSONObject opts) {
         if (opts.has(CONF_COMPRESSION)) {
             int compression = opts.getInt(CONF_COMPRESSION);
             System.out.printf("%s service: compression level = %d%n", getName(), compression);
