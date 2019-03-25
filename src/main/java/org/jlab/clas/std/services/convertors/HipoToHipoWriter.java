@@ -76,7 +76,9 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
         try {
-            writer.addEvent((Event) event);
+            Event hipoEvent = (Event) event;
+            int   eventTag  = hipoEvent.getEventTag();
+            writer.addEvent( hipoEvent,eventTag);
         } catch (Exception e) {
             throw new EventWriterException(e);
         }
