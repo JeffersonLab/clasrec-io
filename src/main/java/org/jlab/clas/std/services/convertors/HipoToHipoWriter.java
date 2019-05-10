@@ -3,11 +3,14 @@ package org.jlab.clas.std.services.convertors;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.std.services.AbstractEventWriterService;
 import org.jlab.clara.std.services.EventWriterException;
 import org.jlab.clas.std.services.util.Clas12Types;
+import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.io.HipoWriter;
 import org.jlab.jnp.hipo4.io.HipoWriterSorted;
@@ -23,6 +26,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     private static final String CONF_COMPRESSION = "compression";
     private static final String CONF_SCHEMA_DIR = "schema_dir";
     private static final String CONF_SCHEMA_FILTER = "schema_filter";
+    private List<Bank>       schemaBankList = new ArrayList<Bank>();
 
     @Override
     protected HipoWriterSorted createWriter(Path file, JSONObject opts) throws EventWriterException {
@@ -57,6 +61,14 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
                 boolean useFilter = opts.optBoolean(CONF_SCHEMA_FILTER, true);
                 System.out.printf("%s service: schema filter = %b%n", getName(), useFilter);
                 filterSetter.invoke(writer, useFilter);
+                
+                if(useFilter==true){
+                    int schemaSize = writer.getSchemaFactory().getSchemaList().size();
+                    for(int i = 0; i < schemaSize; i++){
+                        Bank dataBank = new Bank(writer.getSchemaFactory().getSchemaList().get(i));
+                        schemaBankList.add(dataBank);
+                    }
+                }
             } catch (NoSuchMethodException | IllegalAccessException
                         | IllegalArgumentException | InvocationTargetException e) {
                 System.out.printf("%s service: schema filter not supported%n", getName());
@@ -78,7 +90,17 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
         try {
             Event hipoEvent = (Event) event;
             int   eventTag  = hipoEvent.getEventTag();
-            writer.addEvent( hipoEvent,eventTag);
+            
+            if(eventTag == 1){
+                writer.addEvent( hipoEvent,eventTag);
+            } else {
+                if(schemaBankList.size()>0){
+                    Event reduced = hipoEvent.reduceEvent(schemaBankList);
+                    writer.addEvent( reduced,eventTag);
+                } else {
+                    writer.addEvent( hipoEvent,eventTag);
+                }
+            }
         } catch (Exception e) {
             throw new EventWriterException(e);
         }
