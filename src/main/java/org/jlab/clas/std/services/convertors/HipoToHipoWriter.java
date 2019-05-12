@@ -55,12 +55,12 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
         writer.getSchemaFactory().initFromDirectory(schemaDir);
 
         if (opts.has(CONF_SCHEMA_DIR)) {
-            try {
+            //try {
                 // previous releases of COATJAVA may not have the setter
-                Method filterSetter = getSchemaFilterSetter();
+                //Method filterSetter = getSchemaFilterSetter();
                 boolean useFilter = opts.optBoolean(CONF_SCHEMA_FILTER, true);
                 System.out.printf("%s service: schema filter = %b%n", getName(), useFilter);
-                filterSetter.invoke(writer, useFilter);
+                //filterSetter.invoke(writer, useFilter);
                 
                 if(useFilter==true){
                     int schemaSize = writer.getSchemaFactory().getSchemaList().size();
@@ -69,10 +69,10 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
                         schemaBankList.add(dataBank);
                     }
                 }
-            } catch (NoSuchMethodException | IllegalAccessException
+           /* } catch (NoSuchMethodException | IllegalAccessException
                         | IllegalArgumentException | InvocationTargetException e) {
                 System.out.printf("%s service: schema filter not supported%n", getName());
-            }
+            }*/
         }
     }
 
