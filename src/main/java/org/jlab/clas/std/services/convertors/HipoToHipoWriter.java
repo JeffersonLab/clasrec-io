@@ -41,6 +41,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     }
 
     private void configure(HipoWriterSorted writer, JSONObject opts) {
+        schemaBankList.clear();
         if (opts.has(CONF_COMPRESSION)) {
             int compression = opts.getInt(CONF_COMPRESSION);
             System.out.printf("%s service: compression level = %d%n", getName(), compression);
@@ -83,6 +84,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     @Override
     protected void closeWriter() {
         writer.close();
+        schemaBankList.clear();
     }
 
     @Override
