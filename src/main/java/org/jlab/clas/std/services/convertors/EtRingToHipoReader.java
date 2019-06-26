@@ -23,8 +23,6 @@ import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.jnp.hipo.data.HipoEvent;
 import org.json.JSONObject;
-//import org.rcdb.JDBCProvider;
-//import org.rcdb.RCDB;
 
 import java.io.Closeable;
 import java.io.OutputStream;
