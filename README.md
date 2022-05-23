@@ -1,3 +1,7 @@
+**_THIS REPO IS NOW READ-ONLY, ARCHIVED._**
+
+**_THE FUNCTIONALITY IN THIS REPO WAS IMPORTED to COATJAVA FOR MAINTAINENCE PORPOISES._**
+
 # clasrec-io
 
 Standard I/O services for CLAS12 reconstruction using CLARA.
