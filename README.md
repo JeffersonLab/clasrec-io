@@ -1,6 +1,8 @@
 **_THIS REPO IS NOW READ-ONLY, ARCHIVED._**
 
-**_THE FUNCTIONALITY IN THIS REPO WAS IMPORTED to COATJAVA FOR MAINTAINENCE PORPOISES._**
+**_THE FUNCTIONALITY IN THIS REPO WAS IMPORTED TO COATJAVA FOR MAINTAINENCE PORPOISES._**
+
+See https://github.com/JeffersonLab/clas12-offline-software/tree/development/common-tools/clara-io
 
 # clasrec-io
 
